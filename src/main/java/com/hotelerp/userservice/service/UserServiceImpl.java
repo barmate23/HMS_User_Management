@@ -1,9 +1,12 @@
 package com.hotelerp.userservice.service;
 
 import com.hotelerp.userservice.common.StandardResponse;
+import com.hotelerp.userservice.dto.CommonMasterResponse;
 import com.hotelerp.userservice.dto.UserRequest;
 import com.hotelerp.userservice.dto.UserResponse;
+import com.hotelerp.userservice.entity.CommonMaster;
 import com.hotelerp.userservice.entity.User;
+import com.hotelerp.userservice.repository.CommonMasterRepository;
 import com.hotelerp.userservice.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -28,6 +31,7 @@ import java.util.stream.Collectors;
 public class UserServiceImpl implements UserService {
 
     private final UserRepository repository;
+    private final CommonMasterRepository commonMasterRepository;
     private final BCryptPasswordEncoder passwordEncoder;
 
     // ─────────────────────────────────────────────────────────────────────────
@@ -57,9 +61,12 @@ public class UserServiceImpl implements UserService {
                     .username(request.getUsername())
                     .email(request.getEmail())
                     .phone(request.getPhone())
-                    .department(request.getDepartment())
-                    .role(request.getRole())
-                    .property(request.getProperty())
+                    .department(request.getDepartmentId() != null 
+                            ? commonMasterRepository.findById(request.getDepartmentId()).orElse(null) : null)
+                    .role(request.getRoleId() != null 
+                            ? commonMasterRepository.findById(request.getRoleId()).orElse(null) : null)
+                    .property(request.getPropertyId() != null 
+                            ? commonMasterRepository.findById(request.getPropertyId()).orElse(null) : null)
                     .shift(request.getShift())
                     .status(StringUtils.hasText(request.getStatus()) ? request.getStatus() : "ACTIVE")
                     .floorAccess(joinFloors(request.getFloorAccess()))
@@ -113,9 +120,17 @@ public class UserServiceImpl implements UserService {
             user.setUsername(request.getUsername());
             user.setEmail(request.getEmail());
             user.setPhone(request.getPhone());
-            user.setDepartment(request.getDepartment());
-            user.setRole(request.getRole());
-            user.setProperty(request.getProperty());
+            
+            if (request.getDepartmentId() != null) {
+                user.setDepartment(commonMasterRepository.findById(request.getDepartmentId()).orElse(null));
+            }
+            if (request.getRoleId() != null) {
+                user.setRole(commonMasterRepository.findById(request.getRoleId()).orElse(null));
+            }
+            if (request.getPropertyId() != null) {
+                user.setProperty(commonMasterRepository.findById(request.getPropertyId()).orElse(null));
+            }
+
             user.setShift(request.getShift());
             if (StringUtils.hasText(request.getStatus())) {
                 user.setStatus(request.getStatus());
@@ -251,6 +266,16 @@ public class UserServiceImpl implements UserService {
         return Arrays.asList(floorAccess.split(","));
     }
 
+    private CommonMasterResponse mapToCommonMasterResponse(CommonMaster master) {
+        if (master == null) return null;
+        return CommonMasterResponse.builder()
+                .id(master.getId())
+                .category(master.getCategory())
+                .code(master.getCode())
+                .value(master.getValue())
+                .build();
+    }
+
     private UserResponse mapToResponse(User user) {
         return UserResponse.builder()
                 .id(user.getId())
@@ -259,9 +284,9 @@ public class UserServiceImpl implements UserService {
                 .username(user.getUsername())
                 .email(user.getEmail())
                 .phone(user.getPhone())
-                .department(user.getDepartment())
-                .role(user.getRole())
-                .property(user.getProperty())
+                .department(mapToCommonMasterResponse(user.getDepartment()))
+                .role(mapToCommonMasterResponse(user.getRole()))
+                .property(mapToCommonMasterResponse(user.getProperty()))
                 .shift(user.getShift())
                 .status(user.getStatus())
                 .floorAccess(splitFloors(user.getFloorAccess()))

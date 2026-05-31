@@ -19,9 +19,9 @@ public class UserResponse {
     private String username;
     private String email;
     private String phone;
-    private String department;
-    private String role;
-    private String property;
+    private CommonMasterResponse department;
+    private CommonMasterResponse role;
+    private CommonMasterResponse property;
     private String shift;
     private String status;
     /** Parsed back to a list for the consumer */

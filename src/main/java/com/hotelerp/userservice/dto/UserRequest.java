@@ -27,12 +27,11 @@ public class UserRequest {
 
     private String phone;
 
-    private String department;
+    private Long departmentId;
 
-    @NotBlank(message = "Role is required")
-    private String role;
+    private Long roleId;
 
-    private String property;
+    private Long propertyId;
 
     private String shift;
 

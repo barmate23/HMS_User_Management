@@ -2,9 +2,11 @@ package com.hotelerp.userservice.service;
 
 import com.hotelerp.userservice.common.StandardResponse;
 import com.hotelerp.userservice.dto.*;
+import com.hotelerp.userservice.entity.CommonMaster;
 import com.hotelerp.userservice.entity.Module;
 import com.hotelerp.userservice.entity.Role;
 import com.hotelerp.userservice.entity.RolePermission;
+import com.hotelerp.userservice.repository.CommonMasterRepository;
 import com.hotelerp.userservice.repository.ModuleRepository;
 import com.hotelerp.userservice.repository.RoleRepository;
 import com.hotelerp.userservice.repository.UserRepository;
@@ -25,6 +27,7 @@ public class RoleServiceImpl implements RoleService {
     private final RoleRepository roleRepository;
     private final ModuleRepository moduleRepository;
     private final UserRepository userRepository;
+    private final CommonMasterRepository commonMasterRepository;
 
     @Override
     @Transactional(readOnly = true)
@@ -74,7 +77,8 @@ public class RoleServiceImpl implements RoleService {
 
         Role role = Role.builder()
                 .name(request.getName())
-                .department(request.getDepartment())
+                .department(request.getDepartmentId() != null 
+                        ? commonMasterRepository.findById(request.getDepartmentId()).orElse(null) : null)
                 .accessLevel(request.getAccessLevel())
                 .status(request.getStatus())
                 .description(request.getDescription())
@@ -118,7 +122,9 @@ public class RoleServiceImpl implements RoleService {
         
         // Update basic fields
         role.setName(request.getName());
-        role.setDepartment(request.getDepartment());
+        if (request.getDepartmentId() != null) {
+            role.setDepartment(commonMasterRepository.findById(request.getDepartmentId()).orElse(null));
+        }
         role.setAccessLevel(request.getAccessLevel());
         role.setStatus(request.getStatus());
         role.setDescription(request.getDescription());
@@ -160,6 +166,16 @@ public class RoleServiceImpl implements RoleService {
         return StandardResponse.success(null, "Role deleted successfully");
     }
 
+    private CommonMasterResponse mapToCommonMasterResponse(CommonMaster master) {
+        if (master == null) return null;
+        return CommonMasterResponse.builder()
+                .id(master.getId())
+                .category(master.getCategory())
+                .code(master.getCode())
+                .value(master.getValue())
+                .build();
+    }
+
     private RoleResponse mapToResponse(Role role) {
         List<PermissionResponse> permissions = role.getPermissions().stream()
                 .map(p -> PermissionResponse.builder()
@@ -183,12 +199,12 @@ public class RoleServiceImpl implements RoleService {
                 .sum();
 
         // Get user count for this role
-        long userCount = userRepository.countByRole(role.getName());
+        long userCount = userRepository.countByRoleValue(role.getName());
 
         return RoleResponse.builder()
                 .id(role.getId())
                 .name(role.getName())
-                .department(role.getDepartment())
+                .department(mapToCommonMasterResponse(role.getDepartment()))
                 .accessLevel(role.getAccessLevel())
                 .status(role.getStatus())
                 .description(role.getDescription())

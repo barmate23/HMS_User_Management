@@ -12,7 +12,7 @@ import java.util.List;
 @AllArgsConstructor
 public class RoleRequest {
     private String name;
-    private String department;
+    private Long departmentId;
     private String accessLevel;
     private String status;
     private String description;

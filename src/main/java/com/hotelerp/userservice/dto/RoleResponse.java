@@ -13,7 +13,7 @@ import java.util.List;
 public class RoleResponse {
     private Long id;
     private String name;
-    private String department;
+    private CommonMasterResponse department;
     private String accessLevel;
     private String status;
     private String description;

@@ -41,16 +41,19 @@ public class User {
     private String phone;
 
     /** e.g. Front Office, Housekeeping, Accounts, Management */
-    @Column(name = "department", length = 100)
-    private String department;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "department_id")
+    private CommonMaster department;
 
     /** e.g. Property Administrator, Front Office Manager, Room Attendant */
-    @Column(name = "role", nullable = false, length = 100)
-    private String role;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "role_id")
+    private CommonMaster role;
 
     /** e.g. HMS Cloud - Main Hotel */
-    @Column(name = "property", length = 200)
-    private String property;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "property_id")
+    private CommonMaster property;
 
     /** e.g. Morning Shift, Evening Shift, Night Shift */
     @Column(name = "shift", length = 50)
