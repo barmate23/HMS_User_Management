@@ -10,4 +10,8 @@ public class ServiceConstants {
     public static final String GET_ALL_USERS  = "/getAllUsers";
     public static final String DELETE_USER    = "/deleteUser/{id}";
     public static final String CHANGE_STATUS  = "/changeStatus/{id}";
+
+    // ── Audit Logs ────────────────────────────────────────────────────────
+    public static final String AUDIT_BASE_URL = "/api/v1/audit-logs";
+    public static final String GET_ALL_AUDIT_LOGS = "/getAllAuditLogs";
 }
