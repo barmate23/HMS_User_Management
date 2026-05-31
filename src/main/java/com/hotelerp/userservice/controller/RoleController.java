@@ -17,32 +17,32 @@ public class RoleController {
 
     private final RoleService roleService;
 
-    @GetMapping("/modules")
+    @GetMapping("/getAllModules")
     public StandardResponse<List<ModuleResponse>> getAllModules() {
         return roleService.getAllModules();
     }
 
-    @GetMapping
+    @GetMapping("/getAllRoles")
     public StandardResponse<List<RoleResponse>> getAllRoles() {
         return roleService.getAllRoles();
     }
 
-    @GetMapping("/{id}")
+    @GetMapping("/getRoleById/{id}")
     public StandardResponse<RoleResponse> getRoleById(@PathVariable Long id) {
         return roleService.getRoleById(id);
     }
 
-    @PostMapping
+    @PostMapping("/createRole")
     public StandardResponse<RoleResponse> createRole(@RequestBody RoleRequest request) {
         return roleService.createRole(request);
     }
 
-    @PutMapping("/{id}")
+    @PutMapping("/updateRole/{id}")
     public StandardResponse<RoleResponse> updateRole(@PathVariable Long id, @RequestBody RoleRequest request) {
         return roleService.updateRole(id, request);
     }
 
-    @DeleteMapping("/{id}")
+    @DeleteMapping("/deleteRole/{id}")
     public StandardResponse<Void> deleteRole(@PathVariable Long id) {
         return roleService.deleteRole(id);
     }

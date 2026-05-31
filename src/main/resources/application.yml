@@ -6,7 +6,7 @@ spring:
     name: userservice
 
   datasource:
-    url: jdbc:mysql://localhost:3306/hotel_users?useSSL=false&serverTimezone=UTC
+    url: jdbc:mysql://localhost:3306/hotel?useSSL=false&serverTimezone=UTC
     username: root
     password: root
     driver-class-name: com.mysql.cj.jdbc.Driver
