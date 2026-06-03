@@ -11,7 +11,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/v1/roles")
+@RequestMapping("/api/hmsUserService/v1/roles")
 @RequiredArgsConstructor
 public class RoleController {
 

@@ -3,7 +3,7 @@ package com.hotelerp.userservice.constants;
 public class ServiceConstants {
 
     // ── User ──────────────────────────────────────────────────────────────
-    public static final String USER_BASE_URL = "/api/v1/users";
+    public static final String USER_BASE_URL = "/api/hmsUserService/v1/users";
     public static final String CREATE_USER    = "/createUser";
     public static final String UPDATE_USER    = "/updateUser/{id}";
     public static final String GET_USER_BY_ID = "/getUserById/{id}";
@@ -12,6 +12,6 @@ public class ServiceConstants {
     public static final String CHANGE_STATUS  = "/changeStatus/{id}";
 
     // ── Audit Logs ────────────────────────────────────────────────────────
-    public static final String AUDIT_BASE_URL = "/api/v1/audit-logs";
+    public static final String AUDIT_BASE_URL = "/api/hmsUserService/v1/audit-logs";
     public static final String GET_ALL_AUDIT_LOGS = "/getAllAuditLogs";
 }
