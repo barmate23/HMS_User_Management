@@ -3,10 +3,10 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
-    image: masterservice:latest
-    container_name: masterservice
+    image: userservice:latest
+    container_name: userservice
     ports:
-      - "9002:9002"
+      - "9094:9094"
     networks:
       - updated_orgadmin_rmscadminnetwork
     environment:
