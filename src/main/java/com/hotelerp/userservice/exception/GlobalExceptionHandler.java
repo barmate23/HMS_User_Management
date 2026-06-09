@@ -9,6 +9,7 @@ import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.time.LocalDateTime;
 import java.util.HashMap;
@@ -74,6 +75,22 @@ public class GlobalExceptionHandler {
                                 .details(ex.getDetails())
                                 .build())
                         .build());
+    }
+
+    @ExceptionHandler(ResponseStatusException.class)
+    public ResponseEntity<StandardResponse<Void>> handleResponseStatusException(ResponseStatusException ex) {
+        String logId = LogContext.getLogId();
+        log.error("logId: {} - Request rejected: {}", logId, ex.getReason());
+        HttpStatus status = HttpStatus.resolve(ex.getStatusCode().value());
+        if (status == null) {
+            status = HttpStatus.BAD_REQUEST;
+        }
+        return ResponseEntity.status(status)
+                .body(StandardResponse.error(
+                        ex.getReason() != null ? ex.getReason() : "Request failed",
+                        "REQUEST_REJECTED",
+                        ex.getMessage()
+                ));
     }
 
     @ExceptionHandler(Exception.class)
