@@ -32,6 +32,7 @@ public class UserServiceImpl implements UserService {
 
     private final UserRepository repository;
     private final CommonMasterRepository commonMasterRepository;
+    private final com.hotelerp.userservice.repository.ShiftRepository shiftRepository;
     private final BCryptPasswordEncoder passwordEncoder;
 
     // ─────────────────────────────────────────────────────────────────────────
@@ -67,7 +68,8 @@ public class UserServiceImpl implements UserService {
                             ? commonMasterRepository.findById(request.getRoleId()).orElse(null) : null)
                     .property(request.getPropertyId() != null 
                             ? commonMasterRepository.findById(request.getPropertyId()).orElse(null) : null)
-                    .shift(request.getShift())
+                    .shift(request.getShiftId() != null 
+                            ? shiftRepository.findById(request.getShiftId()).orElse(null) : null)
                     .status(StringUtils.hasText(request.getStatus()) ? request.getStatus() : "ACTIVE")
                     .floorAccess(joinFloors(request.getFloorAccess()))
                     .notes(request.getNotes())
@@ -130,8 +132,9 @@ public class UserServiceImpl implements UserService {
             if (request.getPropertyId() != null) {
                 user.setProperty(commonMasterRepository.findById(request.getPropertyId()).orElse(null));
             }
-
-            user.setShift(request.getShift());
+            if (request.getShiftId() != null) {
+                user.setShift(shiftRepository.findById(request.getShiftId()).orElse(null));
+            }
             if (StringUtils.hasText(request.getStatus())) {
                 user.setStatus(request.getStatus());
             }
@@ -287,13 +290,25 @@ public class UserServiceImpl implements UserService {
                 .department(mapToCommonMasterResponse(user.getDepartment()))
                 .role(mapToCommonMasterResponse(user.getRole()))
                 .property(mapToCommonMasterResponse(user.getProperty()))
-                .shift(user.getShift())
+                .shift(mapToShiftResponse(user.getShift()))
                 .status(user.getStatus())
                 .floorAccess(splitFloors(user.getFloorAccess()))
                 .notes(user.getNotes())
                 .lastLoginAt(user.getLastLoginAt())
                 .createdAt(user.getCreatedAt())
                 .updatedAt(user.getUpdatedAt())
+                .build();
+    }
+
+    private com.hotelerp.userservice.dto.ShiftResponse mapToShiftResponse(com.hotelerp.userservice.entity.Shift shift) {
+        if (shift == null) return null;
+        return com.hotelerp.userservice.dto.ShiftResponse.builder()
+                .id(shift.getId())
+                .shiftName(shift.getShiftName())
+                .shiftCode(shift.getShiftCode())
+                .startTime(shift.getStartTime())
+                .endTime(shift.getEndTime())
+                .status(shift.getStatus())
                 .build();
     }
 }

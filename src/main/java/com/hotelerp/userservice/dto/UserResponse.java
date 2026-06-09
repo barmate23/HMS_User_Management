@@ -22,7 +22,7 @@ public class UserResponse {
     private CommonMasterResponse department;
     private CommonMasterResponse role;
     private CommonMasterResponse property;
-    private String shift;
+    private ShiftResponse shift;
     private String status;
     /** Parsed back to a list for the consumer */
     private List<String> floorAccess;

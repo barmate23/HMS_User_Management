@@ -14,4 +14,13 @@ public class ServiceConstants {
     // ── Audit Logs ────────────────────────────────────────────────────────
     public static final String AUDIT_BASE_URL = "/api/hmsUserService/v1/audit-logs";
     public static final String GET_ALL_AUDIT_LOGS = "/getAllAuditLogs";
+
+    // ── Shifts ────────────────────────────────────────────────────────────
+    public static final String SHIFT_BASE_URL = "/api/hmsUserService/v1/shifts";
+    public static final String CREATE_SHIFT    = "/createShift";
+    public static final String UPDATE_SHIFT    = "/updateShift/{id}";
+    public static final String GET_SHIFT_BY_ID = "/getShiftById/{id}";
+    public static final String GET_ALL_SHIFTS  = "/getAllShifts";
+    public static final String DELETE_SHIFT    = "/deleteShift/{id}";
+    public static final String ASSIGN_SHIFT    = "/assignShift/{userId}";
 }

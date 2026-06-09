@@ -33,7 +33,7 @@ public class UserRequest {
 
     private Long propertyId;
 
-    private String shift;
+    private Long shiftId;
 
     /** ACTIVE | LOCKED | INACTIVE  (defaults to ACTIVE) */
     private String status;

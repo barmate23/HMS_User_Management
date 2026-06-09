@@ -56,8 +56,9 @@ public class User {
     private CommonMaster property;
 
     /** e.g. Morning Shift, Evening Shift, Night Shift */
-    @Column(name = "shift", length = 50)
-    private String shift;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "shift_id")
+    private Shift shift;
 
     /** ACTIVE | LOCKED | INACTIVE */
     @Column(name = "status", nullable = false, length = 20)
