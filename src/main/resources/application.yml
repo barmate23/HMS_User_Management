@@ -55,6 +55,13 @@ app:
   name: User Management Service
   version: 1.0.0
   description: Microservice for managing hotel staff users, roles and access control
+  security:
+    jwt:
+      secret: ${JWT_SECRET:hms-user-service-local-development-secret-change-before-production}
+      access-token-minutes: ${JWT_ACCESS_TOKEN_MINUTES:30}
+      refresh-token-days: ${JWT_REFRESH_TOKEN_DAYS:7}
+    password-reset:
+      token-minutes: ${PASSWORD_RESET_TOKEN_MINUTES:15}
 
 eureka:
   client:
