@@ -21,6 +21,13 @@ public interface UserRepository extends JpaRepository<User, Long> {
 
     Optional<User> findByUsername(String username);
 
+    Optional<User> findByEmail(String email);
+
+    Optional<User> findByEmailIgnoreCase(String email);
+
+    @Query("SELECT u FROM User u LEFT JOIN FETCH u.role WHERE LOWER(u.username) = LOWER(:identifier) OR LOWER(u.email) = LOWER(:identifier)")
+    Optional<User> findByUsernameOrEmailIgnoreCase(@Param("identifier") String identifier);
+
     /**
      * Search users by name, username, email or employee-id.
      * Supports optional department and role filters.
