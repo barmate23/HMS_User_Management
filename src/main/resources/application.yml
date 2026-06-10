@@ -7,7 +7,7 @@ spring:
 
   datasource:
     # Use container/service name, not localhost, when running inside Docker
-    url: jdbc:mysql://erp-mysql:3306/hotel?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC
+    url: jdbc:mysql://localhost:3306/hotel?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC
     username: root
     password: root
     driver-class-name: com.mysql.cj.jdbc.Driver

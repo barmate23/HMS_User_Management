@@ -21,7 +21,7 @@ public class Role {
     
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "department_id")
-    private CommonMaster department;
+    private Department department;
     
     @Column(name = "access_level")
     private String accessLevel; // e.g., Admin, Supervisor, Department

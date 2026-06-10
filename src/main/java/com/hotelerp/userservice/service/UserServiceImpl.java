@@ -2,11 +2,14 @@ package com.hotelerp.userservice.service;
 
 import com.hotelerp.userservice.common.StandardResponse;
 import com.hotelerp.userservice.dto.CommonMasterResponse;
+import com.hotelerp.userservice.dto.DepartmentResponse;
 import com.hotelerp.userservice.dto.UserRequest;
 import com.hotelerp.userservice.dto.UserResponse;
 import com.hotelerp.userservice.entity.CommonMaster;
 import com.hotelerp.userservice.entity.User;
 import com.hotelerp.userservice.repository.CommonMasterRepository;
+import com.hotelerp.userservice.repository.DepartmentRepository;
+import com.hotelerp.userservice.repository.RoleRepository;
 import com.hotelerp.userservice.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -32,6 +35,8 @@ public class UserServiceImpl implements UserService {
 
     private final UserRepository repository;
     private final CommonMasterRepository commonMasterRepository;
+    private final DepartmentRepository departmentRepository;
+    private final RoleRepository roleRepository;
     private final com.hotelerp.userservice.repository.ShiftRepository shiftRepository;
     private final BCryptPasswordEncoder passwordEncoder;
 
@@ -63,9 +68,9 @@ public class UserServiceImpl implements UserService {
                     .email(request.getEmail())
                     .phone(request.getPhone())
                     .department(request.getDepartmentId() != null 
-                            ? commonMasterRepository.findById(request.getDepartmentId()).orElse(null) : null)
+                            ? departmentRepository.findById(request.getDepartmentId()).orElse(null) : null)
                     .role(request.getRoleId() != null 
-                            ? commonMasterRepository.findById(request.getRoleId()).orElse(null) : null)
+                            ? roleRepository.findById(request.getRoleId()).orElse(null) : null)
                     .property(request.getPropertyId() != null 
                             ? commonMasterRepository.findById(request.getPropertyId()).orElse(null) : null)
                     .shift(request.getShiftId() != null 
@@ -124,10 +129,10 @@ public class UserServiceImpl implements UserService {
             user.setPhone(request.getPhone());
             
             if (request.getDepartmentId() != null) {
-                user.setDepartment(commonMasterRepository.findById(request.getDepartmentId()).orElse(null));
+                user.setDepartment(departmentRepository.findById(request.getDepartmentId()).orElse(null));
             }
             if (request.getRoleId() != null) {
-                user.setRole(commonMasterRepository.findById(request.getRoleId()).orElse(null));
+                user.setRole(roleRepository.findById(request.getRoleId()).orElse(null));
             }
             if (request.getPropertyId() != null) {
                 user.setProperty(commonMasterRepository.findById(request.getPropertyId()).orElse(null));
@@ -287,8 +292,8 @@ public class UserServiceImpl implements UserService {
                 .username(user.getUsername())
                 .email(user.getEmail())
                 .phone(user.getPhone())
-                .department(mapToCommonMasterResponse(user.getDepartment()))
-                .role(mapToCommonMasterResponse(user.getRole()))
+                .department(mapToDepartmentResponse(user.getDepartment()))
+                .role(mapToRoleResponse(user.getRole()))
                 .property(mapToCommonMasterResponse(user.getProperty()))
                 .shift(mapToShiftResponse(user.getShift()))
                 .status(user.getStatus())
@@ -297,6 +302,29 @@ public class UserServiceImpl implements UserService {
                 .lastLoginAt(user.getLastLoginAt())
                 .createdAt(user.getCreatedAt())
                 .updatedAt(user.getUpdatedAt())
+                .build();
+    }
+
+    private DepartmentResponse mapToDepartmentResponse(com.hotelerp.userservice.entity.Department department) {
+        if (department == null) return null;
+        return DepartmentResponse.builder()
+                .id(department.getId())
+                .name(department.getName())
+                .description(department.getDescription())
+                .isActive(department.getIsActive())
+                .createdAt(department.getCreatedAt())
+                .updatedAt(department.getUpdatedAt())
+                .build();
+    }
+
+    private com.hotelerp.userservice.dto.RoleResponse mapToRoleResponse(com.hotelerp.userservice.entity.Role role) {
+        if (role == null) return null;
+        return com.hotelerp.userservice.dto.RoleResponse.builder()
+                .id(role.getId())
+                .name(role.getName())
+                .accessLevel(role.getAccessLevel())
+                .status(role.getStatus())
+                .description(role.getDescription())
                 .build();
     }
 

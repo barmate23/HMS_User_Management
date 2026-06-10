@@ -7,6 +7,7 @@ import com.hotelerp.userservice.entity.Module;
 import com.hotelerp.userservice.entity.Role;
 import com.hotelerp.userservice.entity.RolePermission;
 import com.hotelerp.userservice.repository.CommonMasterRepository;
+import com.hotelerp.userservice.repository.DepartmentRepository;
 import com.hotelerp.userservice.repository.ModuleRepository;
 import com.hotelerp.userservice.repository.RoleRepository;
 import com.hotelerp.userservice.repository.UserRepository;
@@ -28,6 +29,7 @@ public class RoleServiceImpl implements RoleService {
     private final ModuleRepository moduleRepository;
     private final UserRepository userRepository;
     private final CommonMasterRepository commonMasterRepository;
+    private final DepartmentRepository departmentRepository;
 
     @Override
     @Transactional(readOnly = true)
@@ -78,7 +80,7 @@ public class RoleServiceImpl implements RoleService {
         Role role = Role.builder()
                 .name(request.getName())
                 .department(request.getDepartmentId() != null 
-                        ? commonMasterRepository.findById(request.getDepartmentId()).orElse(null) : null)
+                        ? departmentRepository.findById(request.getDepartmentId()).orElse(null) : null)
                 .accessLevel(request.getAccessLevel())
                 .status(request.getStatus())
                 .description(request.getDescription())
@@ -123,7 +125,7 @@ public class RoleServiceImpl implements RoleService {
         // Update basic fields
         role.setName(request.getName());
         if (request.getDepartmentId() != null) {
-            role.setDepartment(commonMasterRepository.findById(request.getDepartmentId()).orElse(null));
+            role.setDepartment(departmentRepository.findById(request.getDepartmentId()).orElse(null));
         }
         role.setAccessLevel(request.getAccessLevel());
         role.setStatus(request.getStatus());
@@ -166,13 +168,15 @@ public class RoleServiceImpl implements RoleService {
         return StandardResponse.success(null, "Role deleted successfully");
     }
 
-    private CommonMasterResponse mapToCommonMasterResponse(CommonMaster master) {
-        if (master == null) return null;
-        return CommonMasterResponse.builder()
-                .id(master.getId())
-                .category(master.getCategory())
-                .code(master.getCode())
-                .value(master.getValue())
+    private DepartmentResponse mapToDepartmentResponse(com.hotelerp.userservice.entity.Department department) {
+        if (department == null) return null;
+        return DepartmentResponse.builder()
+                .id(department.getId())
+                .name(department.getName())
+                .description(department.getDescription())
+                .isActive(department.getIsActive())
+                .createdAt(department.getCreatedAt())
+                .updatedAt(department.getUpdatedAt())
                 .build();
     }
 
@@ -199,12 +203,12 @@ public class RoleServiceImpl implements RoleService {
                 .sum();
 
         // Get user count for this role
-        long userCount = userRepository.countByRoleValue(role.getName());
+        long userCount = userRepository.countByRoleName(role.getName());
 
         return RoleResponse.builder()
                 .id(role.getId())
                 .name(role.getName())
-                .department(mapToCommonMasterResponse(role.getDepartment()))
+                .department(mapToDepartmentResponse(role.getDepartment()))
                 .accessLevel(role.getAccessLevel())
                 .status(role.getStatus())
                 .description(role.getDescription())
