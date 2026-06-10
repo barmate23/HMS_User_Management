@@ -13,6 +13,7 @@ import com.hotelerp.userservice.repository.UserRepository;
 import com.hotelerp.userservice.security.JwtService;
 import com.hotelerp.userservice.service.AuthService;
 import io.jsonwebtoken.Claims;
+import jakarta.persistence.EntityNotFoundException;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
@@ -248,11 +249,25 @@ public class AuthServiceImpl implements AuthService {
     }
 
     private String valueOf(Role role) {
-        return role == null ? null : role.getName();
+        try {
+            return role == null ? null : role.getName();
+        } catch (EntityNotFoundException ex) {
+            throw new ResponseStatusException(
+                    CONFLICT,
+                    "User profile is linked to a role that no longer exists. Please update the user's role before login."
+            );
+        }
     }
 
     private String valueOf(Department department) {
-        return department == null ? null : department.getName();
+        try {
+            return department == null ? null : department.getName();
+        } catch (EntityNotFoundException ex) {
+            throw new ResponseStatusException(
+                    CONFLICT,
+                    "User profile is linked to a department that no longer exists. Please update the user's department before login."
+            );
+        }
     }
 
     private String codeOf(CommonMaster item) {
@@ -263,7 +278,14 @@ public class AuthServiceImpl implements AuthService {
     }
 
     private String codeOf(Role role) {
-        return role == null ? null : role.getName().toUpperCase(Locale.ROOT).replaceAll("\\s+", "_");
+        try {
+            return role == null ? null : role.getName().toUpperCase(Locale.ROOT).replaceAll("\\s+", "_");
+        } catch (EntityNotFoundException ex) {
+            throw new ResponseStatusException(
+                    CONFLICT,
+                    "User profile is linked to a role that no longer exists. Please update the user's role before login."
+            );
+        }
     }
 
     private String normalize(String value) {
