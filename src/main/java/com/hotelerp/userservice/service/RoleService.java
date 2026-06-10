@@ -8,7 +8,7 @@ import java.util.List;
 
 public interface RoleService {
     StandardResponse<List<ModuleResponse>> getAllModules();
-    StandardResponse<List<RoleResponse>> getAllRoles();
+    StandardResponse<List<RoleResponse>> getAllRoles(Long departmentId);
     StandardResponse<RoleResponse> getRoleById(Long id);
     StandardResponse<RoleResponse> createRole(RoleRequest request);
     StandardResponse<RoleResponse> updateRole(Long id, RoleRequest request);

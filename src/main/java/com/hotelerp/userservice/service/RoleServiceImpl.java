@@ -2,11 +2,10 @@ package com.hotelerp.userservice.service;
 
 import com.hotelerp.userservice.common.StandardResponse;
 import com.hotelerp.userservice.dto.*;
-import com.hotelerp.userservice.entity.CommonMaster;
+import com.hotelerp.userservice.entity.Department;
 import com.hotelerp.userservice.entity.Module;
 import com.hotelerp.userservice.entity.Role;
 import com.hotelerp.userservice.entity.RolePermission;
-import com.hotelerp.userservice.repository.CommonMasterRepository;
 import com.hotelerp.userservice.repository.DepartmentRepository;
 import com.hotelerp.userservice.repository.ModuleRepository;
 import com.hotelerp.userservice.repository.RoleRepository;
@@ -28,7 +27,6 @@ public class RoleServiceImpl implements RoleService {
     private final RoleRepository roleRepository;
     private final ModuleRepository moduleRepository;
     private final UserRepository userRepository;
-    private final CommonMasterRepository commonMasterRepository;
     private final DepartmentRepository departmentRepository;
 
     @Override
@@ -47,11 +45,15 @@ public class RoleServiceImpl implements RoleService {
 
     @Override
     @Transactional(readOnly = true)
-    public StandardResponse<List<RoleResponse>> getAllRoles() {
-        log.info("Fetching all roles");
-        List<Role> roles = roleRepository.findAll();
+    public StandardResponse<List<RoleResponse>> getAllRoles(Long departmentId) {
+        log.info("Fetching all roles for department: {}", departmentId);
+        List<Role> roles;
+        if (departmentId != null) {
+            roles = roleRepository.findByDepartmentId(departmentId);
+        } else {
+            roles = roleRepository.findAll();
+        }
         
-        // In a real scenario, we'd query counts from the DB, but for now we calculate
         List<RoleResponse> responses = roles.stream()
                 .map(this::mapToResponse)
                 .collect(Collectors.toList());
@@ -168,7 +170,7 @@ public class RoleServiceImpl implements RoleService {
         return StandardResponse.success(null, "Role deleted successfully");
     }
 
-    private DepartmentResponse mapToDepartmentResponse(com.hotelerp.userservice.entity.Department department) {
+    private DepartmentResponse mapToDepartmentResponse(Department department) {
         if (department == null) return null;
         return DepartmentResponse.builder()
                 .id(department.getId())

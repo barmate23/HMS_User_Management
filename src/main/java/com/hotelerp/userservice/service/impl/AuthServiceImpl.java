@@ -3,7 +3,9 @@ package com.hotelerp.userservice.service.impl;
 import com.hotelerp.userservice.dto.*;
 import com.hotelerp.userservice.entity.AuthSession;
 import com.hotelerp.userservice.entity.CommonMaster;
+import com.hotelerp.userservice.entity.Department;
 import com.hotelerp.userservice.entity.PasswordResetToken;
+import com.hotelerp.userservice.entity.Role;
 import com.hotelerp.userservice.entity.User;
 import com.hotelerp.userservice.repository.AuthSessionRepository;
 import com.hotelerp.userservice.repository.PasswordResetTokenRepository;
@@ -245,11 +247,23 @@ public class AuthServiceImpl implements AuthService {
         return item == null ? null : item.getValue();
     }
 
+    private String valueOf(Role role) {
+        return role == null ? null : role.getName();
+    }
+
+    private String valueOf(Department department) {
+        return department == null ? null : department.getName();
+    }
+
     private String codeOf(CommonMaster item) {
         if (item == null) {
             return null;
         }
         return StringUtils.hasText(item.getCode()) ? item.getCode() : item.getValue();
+    }
+
+    private String codeOf(Role role) {
+        return role == null ? null : role.getName().toUpperCase(Locale.ROOT).replaceAll("\\s+", "_");
     }
 
     private String normalize(String value) {

@@ -23,8 +23,8 @@ public class RoleController {
     }
 
     @GetMapping("/getAllRoles")
-    public StandardResponse<List<RoleResponse>> getAllRoles() {
-        return roleService.getAllRoles();
+    public StandardResponse<List<RoleResponse>> getAllRoles(@RequestParam(required = false) Long departmentId) {
+        return roleService.getAllRoles(departmentId);
     }
 
     @GetMapping("/getRoleById/{id}")
