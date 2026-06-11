@@ -61,4 +61,35 @@ public class UserCredentialEmailService {
             return false;
         }
     }
+
+    public boolean sendPasswordResetOtp(User user, String resetCode, java.time.LocalDateTime expiresAt) {
+        if (!mailEnabled || !StringUtils.hasText(mailUsername) || !StringUtils.hasText(mailPassword)) {
+            log.warn("Mail is disabled or not configured. Skipping password reset OTP email for {}", user.getEmail());
+            return false;
+        }
+
+        try {
+            SimpleMailMessage message = new SimpleMailMessage();
+            message.setFrom(fromAddress);
+            message.setTo(user.getEmail());
+            message.setSubject("HMS Cloud password reset OTP");
+            message.setText("""
+                    Hello %s,
+
+                    Use this one-time password to reset your HMS Cloud password:
+
+                    OTP: %s
+
+                    This code expires at %s. If you did not request this reset, contact your administrator.
+
+                    Regards,
+                    HMS Cloud
+                    """.formatted(user.getFullName(), resetCode, expiresAt));
+            mailSender.send(message);
+            return true;
+        } catch (Exception ex) {
+            log.error("Failed to send password reset OTP email to {}", user.getEmail(), ex);
+            return false;
+        }
+    }
 }

@@ -16,4 +16,5 @@ public class PasswordResetInitResponse {
     private LocalDateTime expiresAt;
     private String resetCode;
     private String deliveryMode;
+    private Boolean emailSent;
 }

@@ -12,6 +12,7 @@ import com.hotelerp.userservice.repository.PasswordResetTokenRepository;
 import com.hotelerp.userservice.repository.UserRepository;
 import com.hotelerp.userservice.security.JwtService;
 import com.hotelerp.userservice.service.AuthService;
+import com.hotelerp.userservice.service.UserCredentialEmailService;
 import io.jsonwebtoken.Claims;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -44,6 +45,7 @@ public class AuthServiceImpl implements AuthService {
     private final PasswordResetTokenRepository passwordResetTokenRepository;
     private final BCryptPasswordEncoder passwordEncoder;
     private final JwtService jwtService;
+    private final UserCredentialEmailService credentialEmailService;
 
     @Value("${app.security.password-reset.token-minutes}")
     private long passwordResetMinutes;
@@ -160,11 +162,14 @@ public class AuthServiceImpl implements AuthService {
                 .expiresAt(expiresAt)
                 .build());
 
+        boolean emailSent = credentialEmailService.sendPasswordResetOtp(user, resetCode, expiresAt);
+
         return PasswordResetInitResponse.builder()
                 .email(email)
                 .expiresAt(expiresAt)
-                .resetCode(resetCode)
-                .deliveryMode("DEVELOPMENT_RESPONSE")
+                .resetCode(emailSent ? null : resetCode)
+                .deliveryMode(emailSent ? "EMAIL" : "RESPONSE")
+                .emailSent(emailSent)
                 .build();
     }
 
