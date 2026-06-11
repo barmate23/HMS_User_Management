@@ -174,6 +174,16 @@ public class AuthServiceImpl implements AuthService {
     }
 
     @Override
+    @Transactional(readOnly = true)
+    public void verifyResetCode(VerifyResetCodeRequest request) {
+        String email = normalize(request.getEmail());
+        passwordResetTokenRepository
+                .findTopByEmailAndResetCodeOrderByCreatedAtDesc(email, request.getResetCode())
+                .filter(PasswordResetToken::isUsable)
+                .orElseThrow(() -> new ResponseStatusException(BAD_REQUEST, "Reset code is invalid or expired"));
+    }
+
+    @Override
     @Transactional
     public void resetPassword(ResetPasswordRequest request) {
         String email = normalize(request.getEmail());
