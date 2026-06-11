@@ -29,10 +29,10 @@ spring:
       fail-on-unknown-properties: false
 
   mail:
-    host: ${HMS_MAIL_HOST:smtp.gmail.com}
-    port: ${HMS_MAIL_PORT:587}
-    username: ${HMS_MAIL_USERNAME:noreplyhelixion@gmail.com}
-    password: ${HMS_MAIL_PASSWORD:}
+    host: smtp.gmail.com
+    port: 587
+    username: noreplyhelixion@gmail.com
+    password: "vplj jitw vean rvpn"
     properties:
       mail:
         smtp:
@@ -75,8 +75,8 @@ app:
     password-reset:
       token-minutes: ${PASSWORD_RESET_TOKEN_MINUTES:15}
   mail:
-    from: ${HMS_MAIL_FROM:noreplyhelixion@gmail.com}
-    enabled: ${HMS_MAIL_ENABLED:true}
+    from: noreplyhelixion@gmail.com
+    enabled: true
 
 hms:
   bootstrap:
