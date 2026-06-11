@@ -10,6 +10,7 @@ public class ServiceConstants {
     public static final String GET_ALL_USERS  = "/getAllUsers";
     public static final String DELETE_USER    = "/deleteUser/{id}";
     public static final String CHANGE_STATUS  = "/changeStatus/{id}";
+    public static final String RESET_PASSWORD = "/resetPassword/{id}";
 
     // ── Audit Logs ────────────────────────────────────────────────────────
     public static final String AUDIT_BASE_URL = "/api/hmsUserService/v1/audit-logs";

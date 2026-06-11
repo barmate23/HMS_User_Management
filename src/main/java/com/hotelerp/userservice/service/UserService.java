@@ -1,6 +1,7 @@
 package com.hotelerp.userservice.service;
 
 import com.hotelerp.userservice.common.StandardResponse;
+import com.hotelerp.userservice.dto.PasswordResetResponse;
 import com.hotelerp.userservice.dto.UserRequest;
 
 public interface UserService {
@@ -16,4 +17,6 @@ public interface UserService {
     StandardResponse<?> deleteUser(Long id);
 
     StandardResponse<?> changeStatus(Long id, String status);
+
+    StandardResponse<PasswordResetResponse> resetPassword(Long id);
 }

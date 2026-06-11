@@ -11,4 +11,5 @@ public interface AuthService {
     void logout(String authorizationHeader);
     PasswordResetInitResponse forgotPassword(ForgotPasswordRequest request);
     void resetPassword(ResetPasswordRequest request);
+    void changePassword(ChangePasswordRequest request);
 }

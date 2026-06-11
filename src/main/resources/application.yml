@@ -28,6 +28,18 @@ spring:
     deserialization:
       fail-on-unknown-properties: false
 
+  mail:
+    host: ${HMS_MAIL_HOST:smtp.gmail.com}
+    port: ${HMS_MAIL_PORT:587}
+    username: ${HMS_MAIL_USERNAME:noreplyhelixion@gmail.com}
+    password: ${HMS_MAIL_PASSWORD:}
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
+
   config:
     import: "optional:configserver:"
 
@@ -62,6 +74,9 @@ app:
       refresh-token-days: ${JWT_REFRESH_TOKEN_DAYS:7}
     password-reset:
       token-minutes: ${PASSWORD_RESET_TOKEN_MINUTES:15}
+  mail:
+    from: ${HMS_MAIL_FROM:noreplyhelixion@gmail.com}
+    enabled: ${HMS_MAIL_ENABLED:true}
 
 hms:
   bootstrap:

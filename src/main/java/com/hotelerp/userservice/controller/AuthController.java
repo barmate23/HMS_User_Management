@@ -67,4 +67,10 @@ public class AuthController {
         authService.resetPassword(request);
         return ResponseEntity.ok(StandardResponse.success("Password reset successful"));
     }
+
+    @PostMapping("/change-password")
+    public ResponseEntity<StandardResponse<Void>> changePassword(@Valid @RequestBody ChangePasswordRequest request) {
+        authService.changePassword(request);
+        return ResponseEntity.ok(StandardResponse.success("Password changed successfully"));
+    }
 }

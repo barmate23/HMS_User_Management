@@ -74,6 +74,12 @@ public class User {
     @Column(name = "passwordHash", length = 255)
     private String passwordHash;
 
+    @Column(name = "mustChangePassword", nullable = false)
+    private Boolean mustChangePassword;
+
+    @Column(name = "defaultPasswordGeneratedAt")
+    private LocalDateTime defaultPasswordGeneratedAt;
+
     @Column(name = "lastLoginAt")
     private LocalDateTime lastLoginAt;
 
@@ -88,6 +94,7 @@ public class User {
         createdAt = LocalDateTime.now();
         updatedAt = LocalDateTime.now();
         if (status == null) status = "ACTIVE";
+        if (mustChangePassword == null) mustChangePassword = false;
     }
 
     @PreUpdate

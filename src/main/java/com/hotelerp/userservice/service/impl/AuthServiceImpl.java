@@ -61,6 +61,14 @@ public class AuthServiceImpl implements AuthService {
         if (!StringUtils.hasText(user.getPasswordHash()) || !passwordEncoder.matches(request.getPassword(), user.getPasswordHash())) {
             throw new ResponseStatusException(UNAUTHORIZED, "Invalid username/email or password");
         }
+        if (Boolean.TRUE.equals(user.getMustChangePassword())) {
+            return AuthResponse.builder()
+                    .mustChangePassword(true)
+                    .firstLogin(true)
+                    .passwordChangeRequired(true)
+                    .user(toAuthUser(user, buildAuthorities(user)))
+                    .build();
+        }
 
         return issueSession(user, httpRequest);
     }
@@ -171,10 +179,48 @@ public class AuthServiceImpl implements AuthService {
 
         User user = token.getUser();
         user.setPasswordHash(passwordEncoder.encode(request.getNewPassword()));
+        user.setMustChangePassword(false);
+        user.setDefaultPasswordGeneratedAt(null);
         userRepository.save(user);
 
         token.setUsedAt(LocalDateTime.now());
         passwordResetTokenRepository.save(token);
+
+        List<AuthSession> activeSessions = authSessionRepository.findByUserIdAndRevokedAtIsNull(user.getId());
+        for (AuthSession session : activeSessions) {
+            session.setRevokedAt(LocalDateTime.now());
+        }
+        authSessionRepository.saveAll(activeSessions);
+    }
+
+    @Override
+    @Transactional
+    public void changePassword(ChangePasswordRequest request) {
+        String identifier = normalize(request.getIdentifier());
+        String currentPassword = request.effectiveCurrentPassword();
+        if (!StringUtils.hasText(currentPassword)) {
+            throw new ResponseStatusException(BAD_REQUEST, "Current or temporary password is required");
+        }
+        if (StringUtils.hasText(request.getConfirmPassword()) && !request.getNewPassword().equals(request.getConfirmPassword())) {
+            throw new ResponseStatusException(BAD_REQUEST, "New password and confirmation must match");
+        }
+        if (request.getNewPassword().equals(currentPassword)) {
+            throw new ResponseStatusException(BAD_REQUEST, "New password must be different from the temporary password");
+        }
+
+        User user = userRepository.findByUsernameOrEmailIgnoreCase(identifier)
+                .orElseThrow(() -> new ResponseStatusException(NOT_FOUND, "User not found"));
+        if (!"ACTIVE".equalsIgnoreCase(user.getStatus())) {
+            throw new ResponseStatusException(FORBIDDEN, "User account is not active");
+        }
+        if (!StringUtils.hasText(user.getPasswordHash()) || !passwordEncoder.matches(currentPassword, user.getPasswordHash())) {
+            throw new ResponseStatusException(UNAUTHORIZED, "Current password is invalid");
+        }
+
+        user.setPasswordHash(passwordEncoder.encode(request.getNewPassword()));
+        user.setMustChangePassword(false);
+        user.setDefaultPasswordGeneratedAt(null);
+        userRepository.save(user);
 
         List<AuthSession> activeSessions = authSessionRepository.findByUserIdAndRevokedAtIsNull(user.getId());
         for (AuthSession session : activeSessions) {
