@@ -63,6 +63,21 @@ app:
     password-reset:
       token-minutes: ${PASSWORD_RESET_TOKEN_MINUTES:15}
 
+hms:
+  bootstrap:
+    admin:
+      enabled: ${HMS_BOOTSTRAP_ADMIN_ENABLED:true}
+      employee-id: ${HMS_BOOTSTRAP_ADMIN_EMPLOYEE_ID:EMP-ADMIN}
+      full-name: ${HMS_BOOTSTRAP_ADMIN_FULL_NAME:System Administrator}
+      username: ${HMS_BOOTSTRAP_ADMIN_USERNAME:admin}
+      email: ${HMS_BOOTSTRAP_ADMIN_EMAIL:admin@hmscloud.com}
+      phone: ${HMS_BOOTSTRAP_ADMIN_PHONE:9999999999}
+      password: ${HMS_BOOTSTRAP_ADMIN_PASSWORD:Hms@1234}
+      department: ${HMS_BOOTSTRAP_ADMIN_DEPARTMENT:Administration}
+      role: ${HMS_BOOTSTRAP_ADMIN_ROLE:System Administrator}
+      shift-name: ${HMS_BOOTSTRAP_ADMIN_SHIFT_NAME:Morning Shift}
+      shift-code: ${HMS_BOOTSTRAP_ADMIN_SHIFT_CODE:MORN}
+
 eureka:
   client:
     service-url:
