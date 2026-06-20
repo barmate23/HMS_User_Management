@@ -1,13 +1,13 @@
 package com.hotelerp.userservice.service;
 
 import com.hotelerp.userservice.common.StandardResponse;
-import com.hotelerp.userservice.dto.CommonMasterResponse;
+import com.hotelerp.userservice.dto.HotelResponse;
 import com.hotelerp.userservice.dto.DepartmentResponse;
 import com.hotelerp.userservice.dto.UserRequest;
 import com.hotelerp.userservice.dto.UserResponse;
-import com.hotelerp.userservice.entity.CommonMaster;
+import com.hotelerp.userservice.entity.Hotel;
 import com.hotelerp.userservice.entity.User;
-import com.hotelerp.userservice.repository.CommonMasterRepository;
+import com.hotelerp.userservice.repository.HotelRepository;
 import com.hotelerp.userservice.repository.DepartmentRepository;
 import com.hotelerp.userservice.repository.RoleRepository;
 import com.hotelerp.userservice.repository.UserRepository;
@@ -34,7 +34,7 @@ import java.util.stream.Collectors;
 public class UserServiceImpl implements UserService {
 
     private final UserRepository repository;
-    private final CommonMasterRepository commonMasterRepository;
+    private final HotelRepository hotelRepository;
     private final DepartmentRepository departmentRepository;
     private final RoleRepository roleRepository;
     private final com.hotelerp.userservice.repository.ShiftRepository shiftRepository;
@@ -72,7 +72,7 @@ public class UserServiceImpl implements UserService {
                     .role(request.getRoleId() != null 
                             ? roleRepository.findById(request.getRoleId()).orElse(null) : null)
                     .property(request.getPropertyId() != null 
-                            ? commonMasterRepository.findById(request.getPropertyId()).orElse(null) : null)
+                            ? hotelRepository.findById(request.getPropertyId()).orElse(null) : null)
                     .shift(request.getShiftId() != null 
                             ? shiftRepository.findById(request.getShiftId()).orElse(null) : null)
                     .status(StringUtils.hasText(request.getStatus()) ? request.getStatus() : "ACTIVE")
@@ -135,7 +135,7 @@ public class UserServiceImpl implements UserService {
                 user.setRole(roleRepository.findById(request.getRoleId()).orElse(null));
             }
             if (request.getPropertyId() != null) {
-                user.setProperty(commonMasterRepository.findById(request.getPropertyId()).orElse(null));
+                user.setProperty(hotelRepository.findById(request.getPropertyId()).orElse(null));
             }
             if (request.getShiftId() != null) {
                 user.setShift(shiftRepository.findById(request.getShiftId()).orElse(null));
@@ -274,13 +274,23 @@ public class UserServiceImpl implements UserService {
         return Arrays.asList(floorAccess.split(","));
     }
 
-    private CommonMasterResponse mapToCommonMasterResponse(CommonMaster master) {
-        if (master == null) return null;
-        return CommonMasterResponse.builder()
-                .id(master.getId())
-                .category(master.getCategory())
-                .code(master.getCode())
-                .value(master.getValue())
+    private HotelResponse mapToHotelResponse(Hotel hotel) {
+        if (hotel == null) return null;
+        return HotelResponse.builder()
+                .id(hotel.getId())
+                .name(hotel.getName())
+                .email(hotel.getEmail())
+                .phone(hotel.getPhone())
+                .address(hotel.getAddress())
+                .city(hotel.getCity())
+                .state(hotel.getState())
+                .country(hotel.getCountry())
+                .zipCode(hotel.getZipCode())
+                .totalRooms(hotel.getTotalRooms())
+                .currency(hotel.getCurrency())
+                .isActive(hotel.getIsActive())
+                .createdAt(hotel.getCreatedAt())
+                .updatedAt(hotel.getUpdatedAt())
                 .build();
     }
 
@@ -294,7 +304,7 @@ public class UserServiceImpl implements UserService {
                 .phone(user.getPhone())
                 .department(mapToDepartmentResponse(user.getDepartment()))
                 .role(mapToRoleResponse(user.getRole()))
-                .property(mapToCommonMasterResponse(user.getProperty()))
+                .property(mapToHotelResponse(user.getProperty()))
                 .shift(mapToShiftResponse(user.getShift()))
                 .status(user.getStatus())
                 .floorAccess(splitFloors(user.getFloorAccess()))

@@ -21,7 +21,7 @@ public class UserResponse {
     private String phone;
     private DepartmentResponse department;
     private RoleResponse role;
-    private CommonMasterResponse property;
+    private HotelResponse property;
     private ShiftResponse shift;
     private String status;
     /** Parsed back to a list for the consumer */

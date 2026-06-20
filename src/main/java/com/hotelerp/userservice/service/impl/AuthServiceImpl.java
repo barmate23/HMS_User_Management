@@ -1,8 +1,8 @@
 package com.hotelerp.userservice.service.impl;
 
 import com.hotelerp.userservice.dto.*;
+import com.hotelerp.userservice.entity.Hotel;
 import com.hotelerp.userservice.entity.AuthSession;
-import com.hotelerp.userservice.entity.CommonMaster;
 import com.hotelerp.userservice.entity.Department;
 import com.hotelerp.userservice.entity.PasswordResetToken;
 import com.hotelerp.userservice.entity.Role;
@@ -243,8 +243,8 @@ public class AuthServiceImpl implements AuthService {
         return authorities;
     }
 
-    private String valueOf(CommonMaster item) {
-        return item == null ? null : item.getValue();
+    private String valueOf(Hotel hotel) {
+        return hotel == null ? null : hotel.getName();
     }
 
     private String valueOf(Role role) {
@@ -255,11 +255,11 @@ public class AuthServiceImpl implements AuthService {
         return department == null ? null : department.getName();
     }
 
-    private String codeOf(CommonMaster item) {
-        if (item == null) {
+    private String codeOf(Hotel hotel) {
+        if (hotel == null) {
             return null;
         }
-        return StringUtils.hasText(item.getCode()) ? item.getCode() : item.getValue();
+        return hotel.getName(); // Or some code if Hotel has it
     }
 
     private String codeOf(Role role) {

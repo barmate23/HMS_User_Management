@@ -52,7 +52,7 @@ public class User {
     /** e.g. HMS Cloud - Main Hotel */
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "property_id")
-    private CommonMaster property;
+    private Hotel property;
 
     /** e.g. Morning Shift, Evening Shift, Night Shift */
     @ManyToOne(fetch = FetchType.LAZY)
