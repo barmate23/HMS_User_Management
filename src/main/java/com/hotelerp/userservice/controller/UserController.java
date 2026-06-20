@@ -67,4 +67,9 @@ public class UserController {
             @RequestParam String status) {
         return ResponseEntity.ok(service.changeStatus(id, status));
     }
+
+    @PostMapping(ServiceConstants.RESET_PASSWORD)
+    public ResponseEntity<StandardResponse<?>> resetPassword(@PathVariable Long id) {
+        return ResponseEntity.ok(service.resetPassword(id));
+    }
 }

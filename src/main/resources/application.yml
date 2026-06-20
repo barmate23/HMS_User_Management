@@ -28,6 +28,18 @@ spring:
     deserialization:
       fail-on-unknown-properties: false
 
+  mail:
+    host: smtp.gmail.com
+    port: 587
+    username: noreplyhelixion@gmail.com
+    password: "vplj jitw vean rvpn"
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
+
   config:
     import: "optional:configserver:"
 
@@ -62,6 +74,24 @@ app:
       refresh-token-days: ${JWT_REFRESH_TOKEN_DAYS:7}
     password-reset:
       token-minutes: ${PASSWORD_RESET_TOKEN_MINUTES:15}
+  mail:
+    from: noreplyhelixion@gmail.com
+    enabled: true
+
+hms:
+  bootstrap:
+    admin:
+      enabled: ${HMS_BOOTSTRAP_ADMIN_ENABLED:true}
+      employee-id: ${HMS_BOOTSTRAP_ADMIN_EMPLOYEE_ID:EMP-ADMIN}
+      full-name: ${HMS_BOOTSTRAP_ADMIN_FULL_NAME:System Administrator}
+      username: ${HMS_BOOTSTRAP_ADMIN_USERNAME:admin}
+      email: ${HMS_BOOTSTRAP_ADMIN_EMAIL:admin@hmscloud.com}
+      phone: ${HMS_BOOTSTRAP_ADMIN_PHONE:9999999999}
+      password: ${HMS_BOOTSTRAP_ADMIN_PASSWORD:Hms@1234}
+      department: ${HMS_BOOTSTRAP_ADMIN_DEPARTMENT:Administration}
+      role: ${HMS_BOOTSTRAP_ADMIN_ROLE:System Administrator}
+      shift-name: ${HMS_BOOTSTRAP_ADMIN_SHIFT_NAME:Morning Shift}
+      shift-code: ${HMS_BOOTSTRAP_ADMIN_SHIFT_CODE:MORN}
 
 eureka:
   client:

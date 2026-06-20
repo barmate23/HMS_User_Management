@@ -24,6 +24,7 @@ public class UserResponse {
     private HotelResponse property;
     private ShiftResponse shift;
     private String status;
+    private Boolean mustChangePassword;
     /** Parsed back to a list for the consumer */
     private List<String> floorAccess;
     private String notes;

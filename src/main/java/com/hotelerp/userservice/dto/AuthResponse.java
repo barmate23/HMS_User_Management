@@ -18,4 +18,7 @@ public class AuthResponse {
     private Long expiresInSeconds;
     private LocalDateTime refreshExpiresAt;
     private AuthUserResponse user;
+    private Boolean mustChangePassword;
+    private Boolean firstLogin;
+    private Boolean passwordChangeRequired;
 }

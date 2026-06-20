@@ -26,6 +26,12 @@ services:
       SPRING_DATASOURCE_USERNAME: root
       SPRING_DATASOURCE_PASSWORD: root
       SPRING_JPA_HIBERNATE_DDL_AUTO: update
+      HMS_MAIL_HOST: smtp.gmail.com
+      HMS_MAIL_PORT: 587
+      HMS_MAIL_USERNAME: noreplyhelixion@gmail.com
+      HMS_MAIL_PASSWORD: "vplj jitw vean rvpn"
+      HMS_MAIL_FROM: noreplyhelixion@gmail.com
+      HMS_MAIL_ENABLED: "true"
 
     restart: on-failure
 

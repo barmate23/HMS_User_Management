@@ -12,7 +12,9 @@ import com.hotelerp.userservice.repository.PasswordResetTokenRepository;
 import com.hotelerp.userservice.repository.UserRepository;
 import com.hotelerp.userservice.security.JwtService;
 import com.hotelerp.userservice.service.AuthService;
+import com.hotelerp.userservice.service.UserCredentialEmailService;
 import io.jsonwebtoken.Claims;
+import jakarta.persistence.EntityNotFoundException;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
@@ -43,6 +45,7 @@ public class AuthServiceImpl implements AuthService {
     private final PasswordResetTokenRepository passwordResetTokenRepository;
     private final BCryptPasswordEncoder passwordEncoder;
     private final JwtService jwtService;
+    private final UserCredentialEmailService credentialEmailService;
 
     @Value("${app.security.password-reset.token-minutes}")
     private long passwordResetMinutes;
@@ -59,6 +62,14 @@ public class AuthServiceImpl implements AuthService {
         }
         if (!StringUtils.hasText(user.getPasswordHash()) || !passwordEncoder.matches(request.getPassword(), user.getPasswordHash())) {
             throw new ResponseStatusException(UNAUTHORIZED, "Invalid username/email or password");
+        }
+        if (Boolean.TRUE.equals(user.getMustChangePassword())) {
+            return AuthResponse.builder()
+                    .mustChangePassword(true)
+                    .firstLogin(true)
+                    .passwordChangeRequired(true)
+                    .user(toAuthUser(user, buildAuthorities(user)))
+                    .build();
         }
 
         return issueSession(user, httpRequest);
@@ -151,12 +162,25 @@ public class AuthServiceImpl implements AuthService {
                 .expiresAt(expiresAt)
                 .build());
 
+        boolean emailSent = credentialEmailService.sendPasswordResetOtp(user, resetCode, expiresAt);
+
         return PasswordResetInitResponse.builder()
                 .email(email)
                 .expiresAt(expiresAt)
-                .resetCode(resetCode)
-                .deliveryMode("DEVELOPMENT_RESPONSE")
+                .resetCode(emailSent ? null : resetCode)
+                .deliveryMode(emailSent ? "EMAIL" : "RESPONSE")
+                .emailSent(emailSent)
                 .build();
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public void verifyResetCode(VerifyResetCodeRequest request) {
+        String email = normalize(request.getEmail());
+        passwordResetTokenRepository
+                .findTopByEmailAndResetCodeOrderByCreatedAtDesc(email, request.getResetCode())
+                .filter(PasswordResetToken::isUsable)
+                .orElseThrow(() -> new ResponseStatusException(BAD_REQUEST, "Reset code is invalid or expired"));
     }
 
     @Override
@@ -170,10 +194,48 @@ public class AuthServiceImpl implements AuthService {
 
         User user = token.getUser();
         user.setPasswordHash(passwordEncoder.encode(request.getNewPassword()));
+        user.setMustChangePassword(false);
+        user.setDefaultPasswordGeneratedAt(null);
         userRepository.save(user);
 
         token.setUsedAt(LocalDateTime.now());
         passwordResetTokenRepository.save(token);
+
+        List<AuthSession> activeSessions = authSessionRepository.findByUserIdAndRevokedAtIsNull(user.getId());
+        for (AuthSession session : activeSessions) {
+            session.setRevokedAt(LocalDateTime.now());
+        }
+        authSessionRepository.saveAll(activeSessions);
+    }
+
+    @Override
+    @Transactional
+    public void changePassword(ChangePasswordRequest request) {
+        String identifier = normalize(request.getIdentifier());
+        String currentPassword = request.effectiveCurrentPassword();
+        if (!StringUtils.hasText(currentPassword)) {
+            throw new ResponseStatusException(BAD_REQUEST, "Current or temporary password is required");
+        }
+        if (StringUtils.hasText(request.getConfirmPassword()) && !request.getNewPassword().equals(request.getConfirmPassword())) {
+            throw new ResponseStatusException(BAD_REQUEST, "New password and confirmation must match");
+        }
+        if (request.getNewPassword().equals(currentPassword)) {
+            throw new ResponseStatusException(BAD_REQUEST, "New password must be different from the temporary password");
+        }
+
+        User user = userRepository.findByUsernameOrEmailIgnoreCase(identifier)
+                .orElseThrow(() -> new ResponseStatusException(NOT_FOUND, "User not found"));
+        if (!"ACTIVE".equalsIgnoreCase(user.getStatus())) {
+            throw new ResponseStatusException(FORBIDDEN, "User account is not active");
+        }
+        if (!StringUtils.hasText(user.getPasswordHash()) || !passwordEncoder.matches(currentPassword, user.getPasswordHash())) {
+            throw new ResponseStatusException(UNAUTHORIZED, "Current password is invalid");
+        }
+
+        user.setPasswordHash(passwordEncoder.encode(request.getNewPassword()));
+        user.setMustChangePassword(false);
+        user.setDefaultPasswordGeneratedAt(null);
+        userRepository.save(user);
 
         List<AuthSession> activeSessions = authSessionRepository.findByUserIdAndRevokedAtIsNull(user.getId());
         for (AuthSession session : activeSessions) {
@@ -248,11 +310,25 @@ public class AuthServiceImpl implements AuthService {
     }
 
     private String valueOf(Role role) {
-        return role == null ? null : role.getName();
+        try {
+            return role == null ? null : role.getName();
+        } catch (EntityNotFoundException ex) {
+            throw new ResponseStatusException(
+                    CONFLICT,
+                    "User profile is linked to a role that no longer exists. Please update the user's role before login."
+            );
+        }
     }
 
     private String valueOf(Department department) {
-        return department == null ? null : department.getName();
+        try {
+            return department == null ? null : department.getName();
+        } catch (EntityNotFoundException ex) {
+            throw new ResponseStatusException(
+                    CONFLICT,
+                    "User profile is linked to a department that no longer exists. Please update the user's department before login."
+            );
+        }
     }
 
     private String codeOf(Hotel hotel) {
@@ -263,7 +339,14 @@ public class AuthServiceImpl implements AuthService {
     }
 
     private String codeOf(Role role) {
-        return role == null ? null : role.getName().toUpperCase(Locale.ROOT).replaceAll("\\s+", "_");
+        try {
+            return role == null ? null : role.getName().toUpperCase(Locale.ROOT).replaceAll("\\s+", "_");
+        } catch (EntityNotFoundException ex) {
+            throw new ResponseStatusException(
+                    CONFLICT,
+                    "User profile is linked to a role that no longer exists. Please update the user's role before login."
+            );
+        }
     }
 
     private String normalize(String value) {

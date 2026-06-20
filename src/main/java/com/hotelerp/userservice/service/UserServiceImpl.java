@@ -3,6 +3,7 @@ package com.hotelerp.userservice.service;
 import com.hotelerp.userservice.common.StandardResponse;
 import com.hotelerp.userservice.dto.HotelResponse;
 import com.hotelerp.userservice.dto.DepartmentResponse;
+import com.hotelerp.userservice.dto.PasswordResetResponse;
 import com.hotelerp.userservice.dto.UserRequest;
 import com.hotelerp.userservice.dto.UserResponse;
 import com.hotelerp.userservice.entity.Hotel;
@@ -22,6 +23,8 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 
 
+import java.security.SecureRandom;
+import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
@@ -33,12 +36,16 @@ import java.util.stream.Collectors;
 @Slf4j
 public class UserServiceImpl implements UserService {
 
+    private static final SecureRandom SECURE_RANDOM = new SecureRandom();
+    private static final String PASSWORD_ALPHABET = "ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz23456789@#$%";
+
     private final UserRepository repository;
     private final HotelRepository hotelRepository;
     private final DepartmentRepository departmentRepository;
     private final RoleRepository roleRepository;
     private final com.hotelerp.userservice.repository.ShiftRepository shiftRepository;
     private final BCryptPasswordEncoder passwordEncoder;
+    private final UserCredentialEmailService credentialEmailService;
 
     // ─────────────────────────────────────────────────────────────────────────
     // CREATE
@@ -61,6 +68,9 @@ public class UserServiceImpl implements UserService {
                         "employeeId", request.getEmployeeId());
             }
 
+            String temporaryPassword = StringUtils.hasText(request.getPassword()) ? request.getPassword() : generateTemporaryPassword();
+            boolean forcePasswordChange = true;
+
             User user = User.builder()
                     .employeeId(request.getEmployeeId())
                     .fullName(request.getFullName())
@@ -78,13 +88,26 @@ public class UserServiceImpl implements UserService {
                     .status(StringUtils.hasText(request.getStatus()) ? request.getStatus() : "ACTIVE")
                     .floorAccess(joinFloors(request.getFloorAccess()))
                     .notes(request.getNotes())
-                    .passwordHash(request.getPassword() != null
-                            ? passwordEncoder.encode(request.getPassword()) : null)
+                    .passwordHash(passwordEncoder.encode(temporaryPassword))
+                    .mustChangePassword(forcePasswordChange)
+                    .defaultPasswordGeneratedAt(LocalDateTime.now())
                     .build();
 
             User saved = repository.save(user);
+            boolean emailSent = credentialEmailService.sendTemporaryPassword(saved, temporaryPassword);
             log.info("User created with ID: {}", saved.getId());
-            return StandardResponse.success(mapToResponse(saved), "User created successfully");
+            return StandardResponse.success(
+                    PasswordResetResponse.builder()
+                            .email(saved.getEmail())
+                            .username(saved.getUsername())
+                            .temporaryPassword(temporaryPassword)
+                            .emailSent(emailSent)
+                            .deliveryMode(emailSent ? "EMAIL" : "RESPONSE")
+                            .build(),
+                    emailSent
+                            ? "User created successfully. Temporary password sent by email."
+                            : "User created successfully. Temporary password generated in response."
+            );
         } catch (Exception e) {
             log.error("Error creating user: ", e);
             return StandardResponse.error("Failed to create user", "CREATE_ERROR", e.getMessage());
@@ -148,6 +171,8 @@ public class UserServiceImpl implements UserService {
 
             if (StringUtils.hasText(request.getPassword())) {
                 user.setPasswordHash(passwordEncoder.encode(request.getPassword()));
+                user.setMustChangePassword(true);
+                user.setDefaultPasswordGeneratedAt(LocalDateTime.now());
             }
 
             User updated = repository.save(user);
@@ -262,6 +287,42 @@ public class UserServiceImpl implements UserService {
     // Helpers
     // ─────────────────────────────────────────────────────────────────────────
 
+    @Override
+    @Transactional
+    public StandardResponse<PasswordResetResponse> resetPassword(Long id) {
+        log.info("Generating temporary password for user ID: {}", id);
+        try {
+            Optional<User> opt = repository.findById(id);
+            if (opt.isEmpty()) {
+                return StandardResponse.error("User not found", "NOT_FOUND", "id", null);
+            }
+
+            User user = opt.get();
+            String temporaryPassword = generateTemporaryPassword();
+            user.setPasswordHash(passwordEncoder.encode(temporaryPassword));
+            user.setMustChangePassword(true);
+            user.setDefaultPasswordGeneratedAt(LocalDateTime.now());
+            repository.save(user);
+
+            boolean emailSent = credentialEmailService.sendTemporaryPassword(user, temporaryPassword);
+            return StandardResponse.success(
+                    PasswordResetResponse.builder()
+                            .email(user.getEmail())
+                            .username(user.getUsername())
+                            .temporaryPassword(temporaryPassword)
+                            .emailSent(emailSent)
+                            .deliveryMode(emailSent ? "EMAIL" : "RESPONSE")
+                            .build(),
+                    emailSent
+                            ? "Temporary password generated and sent by email."
+                            : "Temporary password generated in response."
+            );
+        } catch (Exception e) {
+            log.error("Error generating temporary password: ", e);
+            return StandardResponse.error("Failed to generate temporary password", "PASSWORD_RESET_ERROR", e.getMessage());
+        }
+    }
+
     /** Convert List<String> floor list to comma-separated string for DB storage */
     private String joinFloors(List<String> floors) {
         if (floors == null || floors.isEmpty()) return null;
@@ -307,12 +368,35 @@ public class UserServiceImpl implements UserService {
                 .property(mapToHotelResponse(user.getProperty()))
                 .shift(mapToShiftResponse(user.getShift()))
                 .status(user.getStatus())
+                .mustChangePassword(user.getMustChangePassword())
                 .floorAccess(splitFloors(user.getFloorAccess()))
                 .notes(user.getNotes())
                 .lastLoginAt(user.getLastLoginAt())
                 .createdAt(user.getCreatedAt())
                 .updatedAt(user.getUpdatedAt())
                 .build();
+    }
+
+    private String generateTemporaryPassword() {
+        StringBuilder password = new StringBuilder();
+        password.append(randomFrom("ABCDEFGHJKLMNPQRSTUVWXYZ"));
+        password.append(randomFrom("abcdefghijkmnopqrstuvwxyz"));
+        password.append(randomFrom("23456789"));
+        password.append(randomFrom("@#$%"));
+        while (password.length() < 12) {
+            password.append(randomFrom(PASSWORD_ALPHABET));
+        }
+        return shuffle(password.toString());
+    }
+
+    private char randomFrom(String values) {
+        return values.charAt(SECURE_RANDOM.nextInt(values.length()));
+    }
+
+    private String shuffle(String value) {
+        List<String> chars = Arrays.stream(value.split("")).collect(Collectors.toList());
+        Collections.shuffle(chars, SECURE_RANDOM);
+        return String.join("", chars);
     }
 
     private DepartmentResponse mapToDepartmentResponse(com.hotelerp.userservice.entity.Department department) {

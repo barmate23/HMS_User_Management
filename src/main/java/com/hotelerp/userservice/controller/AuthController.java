@@ -67,4 +67,16 @@ public class AuthController {
         authService.resetPassword(request);
         return ResponseEntity.ok(StandardResponse.success("Password reset successful"));
     }
+
+    @PostMapping("/verify-reset-code")
+    public ResponseEntity<StandardResponse<Void>> verifyResetCode(@Valid @RequestBody VerifyResetCodeRequest request) {
+        authService.verifyResetCode(request);
+        return ResponseEntity.ok(StandardResponse.success("Reset code verified successfully"));
+    }
+
+    @PostMapping("/change-password")
+    public ResponseEntity<StandardResponse<Void>> changePassword(@Valid @RequestBody ChangePasswordRequest request) {
+        authService.changePassword(request);
+        return ResponseEntity.ok(StandardResponse.success("Password changed successfully"));
+    }
 }
