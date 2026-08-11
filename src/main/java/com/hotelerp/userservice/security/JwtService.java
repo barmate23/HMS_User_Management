@@ -28,8 +28,7 @@ public class JwtService {
     public JwtService(
             @Value("${app.security.jwt.secret}") String secret,
             @Value("${app.security.jwt.access-token-minutes}") long accessTokenMinutes,
-            @Value("${app.security.jwt.refresh-token-days}") long refreshTokenDays
-    ) {
+            @Value("${app.security.jwt.refresh-token-days}") long refreshTokenDays) {
         this.signingKey = Keys.hmacShaKeyFor(sha256(secret));
         this.accessTokenMinutes = accessTokenMinutes;
         this.refreshTokenDays = refreshTokenDays;
@@ -56,7 +55,6 @@ public class JwtService {
                 .claim("type", "access")
                 .claim("userId", user.getId())
                 .claim("userName", user.getUsername())
-                .claim("username", user.getUsername())
                 .claim("hotelId", hotelId)
                 .claim("hotelName", hotelName)
                 .claim("email", user.getEmail())
