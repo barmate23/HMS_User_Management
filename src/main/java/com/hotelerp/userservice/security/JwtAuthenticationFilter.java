@@ -2,6 +2,7 @@ package com.hotelerp.userservice.security;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.hotelerp.userservice.common.StandardResponse;
+import com.hotelerp.userservice.config.LoginUser;
 import com.hotelerp.userservice.entity.AuthSession;
 import com.hotelerp.userservice.entity.User;
 import com.hotelerp.userservice.repository.AuthSessionRepository;
@@ -33,6 +34,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     private final AuthSessionRepository authSessionRepository;
     private final UserRepository userRepository;
     private final ObjectMapper objectMapper;
+    private final LoginUser loginUser;
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
@@ -60,6 +62,11 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             User user = userRepository.findById(Long.valueOf(claims.getSubject()))
                     .filter(item -> "ACTIVE".equalsIgnoreCase(item.getStatus()))
                     .orElseThrow(() -> new IllegalArgumentException("User is not active"));
+
+            LoginUser extractedLoginUser = jwtService.extractLoginUser(claims);
+            if (loginUser != null && extractedLoginUser != null) {
+                loginUser.setValuesFrom(extractedLoginUser);
+            }
 
             UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(
                     String.valueOf(user.getId()),
