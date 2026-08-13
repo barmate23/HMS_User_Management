@@ -31,6 +31,8 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+import com.hotelerp.userservice.config.LoginUser;
+
 @Service
 @RequiredArgsConstructor
 @Slf4j
@@ -46,6 +48,7 @@ public class UserServiceImpl implements UserService {
     private final com.hotelerp.userservice.repository.ShiftRepository shiftRepository;
     private final BCryptPasswordEncoder passwordEncoder;
     private final UserCredentialEmailService credentialEmailService;
+    private final LoginUser loginUser;
 
     // ─────────────────────────────────────────────────────────────────────────
     // CREATE
@@ -71,6 +74,8 @@ public class UserServiceImpl implements UserService {
             String temporaryPassword = StringUtils.hasText(request.getPassword()) ? request.getPassword() : generateTemporaryPassword();
             boolean forcePasswordChange = true;
 
+            Long hotelId = loginUser != null ? loginUser.getHotelId() : null;
+
             User user = User.builder()
                     .employeeId(request.getEmployeeId())
                     .fullName(request.getFullName())
@@ -81,8 +86,8 @@ public class UserServiceImpl implements UserService {
                             ? departmentRepository.findById(request.getDepartmentId()).orElse(null) : null)
                     .role(request.getRoleId() != null 
                             ? roleRepository.findById(request.getRoleId()).orElse(null) : null)
-                    .property(request.getPropertyId() != null 
-                            ? hotelRepository.findById(request.getPropertyId()).orElse(null) : null)
+                    .property(hotelId != null 
+                            ? hotelRepository.findById(hotelId).orElse(null) : null)
                     .shift(request.getShiftId() != null 
                             ? shiftRepository.findById(request.getShiftId()).orElse(null) : null)
                     .status(StringUtils.hasText(request.getStatus()) ? request.getStatus() : "ACTIVE")
@@ -157,9 +162,10 @@ public class UserServiceImpl implements UserService {
             if (request.getRoleId() != null) {
                 user.setRole(roleRepository.findById(request.getRoleId()).orElse(null));
             }
-            if (request.getPropertyId() != null) {
-                user.setProperty(hotelRepository.findById(request.getPropertyId()).orElse(null));
-            }
+            
+            Long hotelId = loginUser != null ? loginUser.getHotelId() : null;
+            user.setProperty(hotelId != null ? hotelRepository.findById(hotelId).orElse(null) : null);
+
             if (request.getShiftId() != null) {
                 user.setShift(shiftRepository.findById(request.getShiftId()).orElse(null));
             }
@@ -206,14 +212,16 @@ public class UserServiceImpl implements UserService {
     @Override
     @Transactional(readOnly = true)
     public StandardResponse<?> getAllUsers(String searchText, String department, String role, int page, int size) {
-        log.info("Fetching users – searchText={}, dept={}, role={}, page={}, size={}", searchText, department,
-                role, page, size);
+        Long hotelId = loginUser != null ? loginUser.getHotelId() : null;
+        log.info("Fetching users – searchText={}, dept={}, role={}, hotelId={}, page={}, size={}",
+                searchText, department, role, hotelId, page, size);
         try {
             Pageable pageable = PageRequest.of(page, size);
             Page<User> userPage = repository.searchUsers(
                     StringUtils.hasText(searchText) ? searchText : null,
                     StringUtils.hasText(department) ? department : null,
                     StringUtils.hasText(role) ? role : null,
+                    hotelId,
                     pageable);
 
             List<UserResponse> responses = userPage.getContent().stream()

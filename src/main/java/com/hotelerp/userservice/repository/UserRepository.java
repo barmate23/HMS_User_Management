@@ -30,11 +30,12 @@ public interface UserRepository extends JpaRepository<User, Long> {
 
     /**
      * Search users by name, username, email or employee-id.
-     * Supports optional department and role filters.
+     * Supports optional department, role, and hotelId/property filters.
      */
     @Query("SELECT u FROM User u " +
             "LEFT JOIN u.department d " +
             "LEFT JOIN u.role r " +
+            "LEFT JOIN u.property p " +
             "WHERE " +
             "(:searchText IS NULL OR " +
             "  u.fullName   LIKE %:searchText% OR " +
@@ -42,11 +43,13 @@ public interface UserRepository extends JpaRepository<User, Long> {
             "  u.email      LIKE %:searchText% OR " +
             "  u.employeeId LIKE %:searchText%) AND " +
             "(:department IS NULL OR d.name = :department) AND " +
-            "(:role IS NULL OR r.name = :role)")
+            "(:role IS NULL OR r.name = :role) AND " +
+            "(:hotelId IS NULL OR p.id = :hotelId)")
     Page<User> searchUsers(
             @Param("searchText")  String searchText,
             @Param("department")  String department,
             @Param("role")        String role,
+            @Param("hotelId")     Long hotelId,
             Pageable pageable
     );
 

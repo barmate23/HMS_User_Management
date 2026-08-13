@@ -40,6 +40,7 @@ public class UserController {
      * GET /api/v1/users/getAllUsers
      * Query params: searchText, department, role, page (0-based), size
      * Matches the User Directory listing with filters shown in the UI.
+     * Hotel/Property ID is extracted automatically from the JWT token.
      */
     @GetMapping(ServiceConstants.GET_ALL_USERS)
     public ResponseEntity<StandardResponse<?>> getAllUsers(
