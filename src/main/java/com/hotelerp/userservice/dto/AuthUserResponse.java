@@ -23,6 +23,9 @@ public class AuthUserResponse {
     private String roleCode;
     private String department;
     private String property;
+    private Long hotelId;
+    private String licenseStatus;
+    private LocalDateTime licenseExpiresAt;
     private String status;
     private LocalDateTime lastLoginAt;
     private List<String> authorities;
