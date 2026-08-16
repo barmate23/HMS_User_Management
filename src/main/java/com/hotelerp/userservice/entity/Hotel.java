@@ -55,6 +55,15 @@ public class Hotel {
     @Column(name = "currency", nullable = false, length = 3)
     private String currency = "USD";
 
+    @Column(name = "licenseKey", length = 100)
+    private String licenseKey;
+
+    @Column(name = "licenseStatus", length = 30)
+    private String licenseStatus = "PENDING_ACTIVATION";
+
+    @Column(name = "licenseExpiresAt")
+    private LocalDateTime licenseExpiresAt;
+
     @Column(name = "createdAt", nullable = false, updatable = false)
     private LocalDateTime createdAt = LocalDateTime.now();
 
