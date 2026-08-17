@@ -1,7 +1,9 @@
 package com.hotelerp.userservice.security;
 
 import com.hotelerp.userservice.config.LoginUser;
+import com.hotelerp.userservice.entity.Hotel;
 import com.hotelerp.userservice.entity.User;
+import com.hotelerp.userservice.repository.HotelRepository;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
@@ -24,14 +26,17 @@ public class JwtService {
     private final SecretKey signingKey;
     private final long accessTokenMinutes;
     private final long refreshTokenDays;
+    private final HotelRepository hotelRepository;
 
     public JwtService(
             @Value("${app.security.jwt.secret}") String secret,
             @Value("${app.security.jwt.access-token-minutes}") long accessTokenMinutes,
-            @Value("${app.security.jwt.refresh-token-days}") long refreshTokenDays) {
+            @Value("${app.security.jwt.refresh-token-days}") long refreshTokenDays,
+            HotelRepository hotelRepository) {
         this.signingKey = Keys.hmacShaKeyFor(sha256(secret));
         this.accessTokenMinutes = accessTokenMinutes;
         this.refreshTokenDays = refreshTokenDays;
+        this.hotelRepository = hotelRepository;
     }
 
     public String generateAccessToken(User user, String tokenId, List<String> authorities) {
@@ -39,6 +44,7 @@ public class JwtService {
         Long hotelId = null;
         String hotelName = null;
         String licenseStatus = null;
+
         if (user.getProperty() != null) {
             try {
                 hotelId = user.getProperty().getId();
@@ -46,6 +52,14 @@ public class JwtService {
                 licenseStatus = user.getProperty().getLicenseStatus();
             } catch (EntityNotFoundException ex) {
                 // Property entity not found or soft-deleted
+            }
+        } else if (hotelRepository != null && user.getEmail() != null) {
+            var hotelOpt = hotelRepository.findByEmail(user.getEmail());
+            if (hotelOpt.isPresent()) {
+                Hotel h = hotelOpt.get();
+                hotelId = h.getId();
+                hotelName = h.getName();
+                licenseStatus = h.getLicenseStatus();
             }
         }
 

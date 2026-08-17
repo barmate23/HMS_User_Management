@@ -116,6 +116,7 @@ public class LicenseServiceImpl implements LicenseService {
                 .phone(request.getAdminPhone() != null ? request.getAdminPhone() : request.getPhone())
                 .department(adminDept)
                 .role(adminRole)
+                .property(hotel)
                 .shift(defaultShift)
                 .status("ACTIVE")
                 .floorAccess("All Floors")
