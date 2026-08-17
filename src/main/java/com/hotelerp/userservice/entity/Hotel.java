@@ -52,25 +52,43 @@ public class Hotel {
     @Column(name = "totalRooms", nullable = false)
     private Integer totalRooms;
 
+    @Builder.Default
     @Column(name = "currency", nullable = false, length = 3)
     private String currency = "USD";
 
     @Column(name = "licenseKey", length = 100)
     private String licenseKey;
 
+    @Builder.Default
     @Column(name = "licenseStatus", length = 30)
     private String licenseStatus = "PENDING_ACTIVATION";
 
     @Column(name = "licenseExpiresAt")
     private LocalDateTime licenseExpiresAt;
 
+    @Builder.Default
     @Column(name = "createdAt", nullable = false, updatable = false)
     private LocalDateTime createdAt = LocalDateTime.now();
 
+    @Builder.Default
     @Column(name = "updatedAt")
     private LocalDateTime updatedAt = LocalDateTime.now();
 
+    @Builder.Default
     @Column(name = "isActive")
     private Boolean isActive = true;
 
+    @PrePersist
+    protected void onCreate() {
+        if (createdAt == null) createdAt = LocalDateTime.now();
+        if (updatedAt == null) updatedAt = LocalDateTime.now();
+        if (isActive == null) isActive = true;
+        if (currency == null) currency = "USD";
+        if (licenseStatus == null) licenseStatus = "PENDING_ACTIVATION";
+    }
+
+    @PreUpdate
+    protected void onUpdate() {
+        updatedAt = LocalDateTime.now();
+    }
 }

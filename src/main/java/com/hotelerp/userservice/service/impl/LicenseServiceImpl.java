@@ -69,6 +69,8 @@ public class LicenseServiceImpl implements LicenseService {
                 .currency("USD")
                 .isActive(true)
                 .licenseStatus("PENDING_ACTIVATION")
+                .createdAt(LocalDateTime.now())
+                .updatedAt(LocalDateTime.now())
                 .build();
 
         hotel = hotelRepository.save(hotel);
