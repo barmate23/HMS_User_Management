@@ -38,10 +38,12 @@ public class JwtService {
         Instant now = Instant.now();
         Long hotelId = null;
         String hotelName = null;
+        String licenseStatus = null;
         if (user.getProperty() != null) {
             try {
                 hotelId = user.getProperty().getId();
                 hotelName = user.getProperty().getName();
+                licenseStatus = user.getProperty().getLicenseStatus();
             } catch (EntityNotFoundException ex) {
                 // Property entity not found or soft-deleted
             }
@@ -57,6 +59,7 @@ public class JwtService {
                 .claim("userName", user.getUsername())
                 .claim("hotelId", hotelId)
                 .claim("hotelName", hotelName)
+                .claim("licenseStatus", licenseStatus)
                 .claim("email", user.getEmail())
                 .claim("authorities", authorities)
                 .signWith(signingKey)
