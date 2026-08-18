@@ -2,10 +2,8 @@ package com.hotelerp.userservice.entity;
 
 import jakarta.persistence.*;
 import lombok.*;
-
-import java.time.LocalDateTime;
+import org.hibernate.annotations.SQLRestriction;
 import java.time.LocalTime;
-
 
 @Entity
 @Table(name = "shifts", indexes = {
@@ -13,10 +11,12 @@ import java.time.LocalTime;
         @Index(name = "idx_shift_status", columnList = "status")
 })
 @Data
+@EqualsAndHashCode(callSuper = true)
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class Shift {
+@SQLRestriction("is_deleted = false")
+public class Shift extends BaseEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -44,21 +44,8 @@ public class Shift {
     @Column(name = "notes", columnDefinition = "TEXT")
     private String notes;
 
-    @Column(name = "created_at", nullable = false, updatable = false)
-    private LocalDateTime createdAt;
-
-    @Column(name = "updated_at")
-    private LocalDateTime updatedAt;
-
     @PrePersist
-    protected void onCreate() {
-        createdAt = LocalDateTime.now();
-        updatedAt = LocalDateTime.now();
+    protected void initStatus() {
         if (status == null) status = "ACTIVE";
-    }
-
-    @PreUpdate
-    protected void onUpdate() {
-        updatedAt = LocalDateTime.now();
     }
 }

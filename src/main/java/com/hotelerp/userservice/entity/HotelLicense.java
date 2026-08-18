@@ -4,8 +4,9 @@ import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
-
+import org.hibernate.annotations.SQLRestriction;
 import java.time.LocalDateTime;
 
 @Entity
@@ -15,10 +16,12 @@ import java.time.LocalDateTime;
         @Index(name = "idx_license_status", columnList = "status")
 })
 @Data
+@EqualsAndHashCode(callSuper = true)
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class HotelLicense {
+@SQLRestriction("is_deleted = false")
+public class HotelLicense extends BaseEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -71,23 +74,10 @@ public class HotelLicense {
     @Column(name = "lastRenewalAt")
     private LocalDateTime lastRenewalAt;
 
-    @Column(name = "createdAt", nullable = false, updatable = false)
-    private LocalDateTime createdAt;
-
-    @Column(name = "updatedAt")
-    private LocalDateTime updatedAt;
-
     @PrePersist
-    protected void onCreate() {
-        createdAt = LocalDateTime.now();
-        updatedAt = LocalDateTime.now();
+    protected void initFields() {
         if (issuedAt == null) issuedAt = LocalDateTime.now();
         if (status == null) status = "PENDING_ACTIVATION";
         if (renewalCount == null) renewalCount = 0;
-    }
-
-    @PreUpdate
-    protected void onUpdate() {
-        updatedAt = LocalDateTime.now();
     }
 }

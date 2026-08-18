@@ -8,5 +8,5 @@ import java.util.Optional;
 
 @Repository
 public interface PasswordResetTokenRepository extends JpaRepository<PasswordResetToken, Long> {
-    Optional<PasswordResetToken> findTopByEmailAndResetCodeOrderByCreatedAtDesc(String email, String resetCode);
+    Optional<PasswordResetToken> findTopByEmailAndResetCodeOrderByCreatedOnDesc(String email, String resetCode);
 }

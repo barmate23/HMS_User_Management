@@ -2,7 +2,7 @@ package com.hotelerp.userservice.entity;
 
 import jakarta.persistence.*;
 import lombok.*;
-
+import org.hibernate.annotations.SQLRestriction;
 import java.time.LocalDateTime;
 
 @Entity
@@ -13,10 +13,12 @@ import java.time.LocalDateTime;
         @Index(name = "idx_auth_session_revoked", columnList = "revokedAt")
 })
 @Data
+@EqualsAndHashCode(callSuper = true)
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class AuthSession {
+@SQLRestriction("is_deleted = false")
+public class AuthSession extends BaseEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

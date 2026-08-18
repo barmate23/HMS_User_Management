@@ -2,7 +2,7 @@ package com.hotelerp.userservice.entity;
 
 import jakarta.persistence.*;
 import lombok.*;
-
+import org.hibernate.annotations.SQLRestriction;
 import java.time.LocalDateTime;
 
 @Entity
@@ -13,10 +13,12 @@ import java.time.LocalDateTime;
         @Index(name = "idx_audit_module", columnList = "module")
 })
 @Data
+@EqualsAndHashCode(callSuper = true)
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class AuditLog {
+@SQLRestriction("is_deleted = false")
+public class AuditLog extends BaseEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -50,7 +52,7 @@ public class AuditLog {
     private LocalDateTime timestamp;
 
     @PrePersist
-    protected void onCreate() {
+    protected void initTimestamp() {
         if (timestamp == null) {
             timestamp = LocalDateTime.now();
         }

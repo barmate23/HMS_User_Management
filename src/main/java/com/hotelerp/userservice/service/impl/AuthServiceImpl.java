@@ -179,7 +179,7 @@ public class AuthServiceImpl implements AuthService {
     public void verifyResetCode(VerifyResetCodeRequest request) {
         String email = normalize(request.getEmail());
         passwordResetTokenRepository
-                .findTopByEmailAndResetCodeOrderByCreatedAtDesc(email, request.getResetCode())
+                .findTopByEmailAndResetCodeOrderByCreatedOnDesc(email, request.getResetCode())
                 .filter(PasswordResetToken::isUsable)
                 .orElseThrow(() -> new ResponseStatusException(BAD_REQUEST, "Reset code is invalid or expired"));
     }
@@ -189,7 +189,7 @@ public class AuthServiceImpl implements AuthService {
     public void resetPassword(ResetPasswordRequest request) {
         String email = normalize(request.getEmail());
         PasswordResetToken token = passwordResetTokenRepository
-                .findTopByEmailAndResetCodeOrderByCreatedAtDesc(email, request.getResetCode())
+                .findTopByEmailAndResetCodeOrderByCreatedOnDesc(email, request.getResetCode())
                 .filter(PasswordResetToken::isUsable)
                 .orElseThrow(() -> new ResponseStatusException(BAD_REQUEST, "Reset code is invalid or expired"));
 

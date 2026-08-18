@@ -105,7 +105,9 @@ public class DepartmentServiceImpl implements DepartmentService {
             return StandardResponse.error("Department not found", "NOT_FOUND", "id", String.valueOf(id));
         }
 
-        departmentRepository.deleteById(id);
+        Department department = deptOpt.get();
+        department.setIsDeleted(true);
+        departmentRepository.save(department);
         return StandardResponse.success(null, "Department deleted successfully");
     }
 
@@ -129,8 +131,8 @@ public class DepartmentServiceImpl implements DepartmentService {
                 .isActive(department.getIsActive())
                 .hotelId(department.getProperty() != null ? department.getProperty().getId() : null)
                 .hotelName(department.getProperty() != null ? department.getProperty().getName() : null)
-                .createdAt(department.getCreatedAt())
-                .updatedAt(department.getUpdatedAt())
+                .createdAt(department.getCreatedOn())
+                .updatedAt(department.getModifiedOn())
                 .build();
     }
 }

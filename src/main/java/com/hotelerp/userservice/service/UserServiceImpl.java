@@ -256,6 +256,7 @@ public class UserServiceImpl implements UserService {
             }
             User user = opt.get();
             user.setStatus("INACTIVE");
+            user.setIsDeleted(true);
             repository.save(user);
             return StandardResponse.success("User deleted successfully");
         } catch (Exception e) {
@@ -358,8 +359,8 @@ public class UserServiceImpl implements UserService {
                 .totalRooms(hotel.getTotalRooms())
                 .currency(hotel.getCurrency())
                 .isActive(hotel.getIsActive())
-                .createdAt(hotel.getCreatedAt())
-                .updatedAt(hotel.getUpdatedAt())
+                .createdAt(hotel.getCreatedOn())
+                .updatedAt(hotel.getModifiedOn())
                 .build();
     }
 
@@ -380,8 +381,8 @@ public class UserServiceImpl implements UserService {
                 .floorAccess(splitFloors(user.getFloorAccess()))
                 .notes(user.getNotes())
                 .lastLoginAt(user.getLastLoginAt())
-                .createdAt(user.getCreatedAt())
-                .updatedAt(user.getUpdatedAt())
+                .createdAt(user.getCreatedOn())
+                .updatedAt(user.getModifiedOn())
                 .build();
     }
 
@@ -414,8 +415,8 @@ public class UserServiceImpl implements UserService {
                 .name(department.getName())
                 .description(department.getDescription())
                 .isActive(department.getIsActive())
-                .createdAt(department.getCreatedAt())
-                .updatedAt(department.getUpdatedAt())
+                .createdAt(department.getCreatedOn())
+                .updatedAt(department.getModifiedOn())
                 .build();
     }
 

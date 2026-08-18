@@ -69,25 +69,16 @@ public class LicenseServiceImpl implements LicenseService {
                 .currency("USD")
                 .isActive(true)
                 .licenseStatus("PENDING_ACTIVATION")
-                .createdAt(LocalDateTime.now())
-                .updatedAt(LocalDateTime.now())
                 .build();
 
         hotel = hotelRepository.save(hotel);
 
-        // 2. Create Default Hotel Admin User
-        Department adminDept = departmentRepository.findByName("Administration")
-                .orElseGet(() -> departmentRepository.save(Department.builder()
-                        .name("Administration")
-                        .description("Default hotel administrative department")
-                        .isActive(true)
-                        .build()));
+
 
         Role adminRole = roleRepository.findByName("Hotel Admin")
                 .or(() -> roleRepository.findByName("System Administrator"))
                 .orElseGet(() -> roleRepository.save(Role.builder()
                         .name("Hotel Admin")
-                        .department(adminDept)
                         .accessLevel("ADMIN")
                         .status("ACTIVE")
                         .description("Administrator with full hotel management access")
@@ -114,7 +105,6 @@ public class LicenseServiceImpl implements LicenseService {
                 .username(request.getAdminUsername())
                 .email(StringUtils.hasText(request.getAdminEmail()) ? request.getAdminEmail() : request.getEmail())
                 .phone(request.getAdminPhone() != null ? request.getAdminPhone() : request.getPhone())
-                .department(adminDept)
                 .role(adminRole)
                 .property(hotel)
                 .shift(defaultShift)

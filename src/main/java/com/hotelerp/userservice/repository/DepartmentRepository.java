@@ -20,4 +20,5 @@ public interface DepartmentRepository extends JpaRepository<Department, Long> {
 
     @Query("SELECT d FROM Department d WHERE d.name = :name AND (:hotelId IS NULL OR d.property.id = :hotelId)")
     Optional<Department> findByNameAndPropertyId(@Param("name") String name, @Param("hotelId") Long hotelId);
+
 }

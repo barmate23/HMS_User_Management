@@ -163,10 +163,13 @@ public class RoleServiceImpl implements RoleService {
     @Transactional
     public StandardResponse<Void> deleteRole(Long id) {
         log.info("Deleting role ID: {}", id);
-        if (!roleRepository.existsById(id)) {
+        Optional<Role> roleOpt = roleRepository.findById(id);
+        if (roleOpt.isEmpty()) {
             return StandardResponse.error("Role not found", "NOT_FOUND", "id", String.valueOf(id));
         }
-        roleRepository.deleteById(id);
+        Role role = roleOpt.get();
+        role.setIsDeleted(true);
+        roleRepository.save(role);
         return StandardResponse.success(null, "Role deleted successfully");
     }
 
@@ -177,8 +180,8 @@ public class RoleServiceImpl implements RoleService {
                 .name(department.getName())
                 .description(department.getDescription())
                 .isActive(department.getIsActive())
-                .createdAt(department.getCreatedAt())
-                .updatedAt(department.getUpdatedAt())
+                .createdAt(department.getCreatedOn())
+                .updatedAt(department.getModifiedOn())
                 .build();
     }
 

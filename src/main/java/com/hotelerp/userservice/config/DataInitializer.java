@@ -104,17 +104,11 @@ public class DataInitializer implements CommandLineRunner {
             return;
         }
 
-        Department department = departmentRepository.findByName(adminDepartmentName)
-                .orElseGet(() -> departmentRepository.save(Department.builder()
-                        .name(adminDepartmentName)
-                        .description("Default administration department created during service bootstrap.")
-                        .isActive(true)
-                        .build()));
+
 
         Role role = roleRepository.findByName(adminRoleName)
                 .orElseGet(() -> roleRepository.save(Role.builder()
                         .name(adminRoleName)
-                        .department(department)
                         .accessLevel("ADMIN")
                         .status("ACTIVE")
                         .description("Default admin role with full application access.")
@@ -146,7 +140,6 @@ public class DataInitializer implements CommandLineRunner {
                 .username(adminUsername)
                 .email(adminEmail)
                 .phone(adminPhone)
-                .department(department)
                 .role(role)
                 .shift(shift)
                 .status("ACTIVE")

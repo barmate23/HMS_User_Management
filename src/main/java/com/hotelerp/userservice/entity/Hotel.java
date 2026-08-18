@@ -1,11 +1,8 @@
 package com.hotelerp.userservice.entity;
 
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-
+import lombok.*;
+import org.hibernate.annotations.SQLRestriction;
 import java.time.LocalDateTime;
 
 @Entity
@@ -15,10 +12,12 @@ import java.time.LocalDateTime;
         @Index(name = "idx_active", columnList = "isActive")
 })
 @Data
+@EqualsAndHashCode(callSuper = true)
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class Hotel {
+@SQLRestriction("is_deleted = false")
+public class Hotel extends BaseEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -67,28 +66,13 @@ public class Hotel {
     private LocalDateTime licenseExpiresAt;
 
     @Builder.Default
-    @Column(name = "createdAt", nullable = false, updatable = false)
-    private LocalDateTime createdAt = LocalDateTime.now();
-
-    @Builder.Default
-    @Column(name = "updatedAt")
-    private LocalDateTime updatedAt = LocalDateTime.now();
-
-    @Builder.Default
     @Column(name = "isActive")
     private Boolean isActive = true;
 
     @PrePersist
-    protected void onCreate() {
-        if (createdAt == null) createdAt = LocalDateTime.now();
-        if (updatedAt == null) updatedAt = LocalDateTime.now();
+    protected void initFields() {
         if (isActive == null) isActive = true;
         if (currency == null) currency = "USD";
         if (licenseStatus == null) licenseStatus = "PENDING_ACTIVATION";
-    }
-
-    @PreUpdate
-    protected void onUpdate() {
-        updatedAt = LocalDateTime.now();
     }
 }

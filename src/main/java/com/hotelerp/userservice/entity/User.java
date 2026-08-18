@@ -2,9 +2,8 @@ package com.hotelerp.userservice.entity;
 
 import jakarta.persistence.*;
 import lombok.*;
-
+import org.hibernate.annotations.SQLRestriction;
 import java.time.LocalDateTime;
-
 
 @Entity
 @Table(name = "users", indexes = {
@@ -15,10 +14,12 @@ import java.time.LocalDateTime;
         @Index(name = "idx_status",      columnList = "status")
 })
 @Data
+@EqualsAndHashCode(callSuper = true)
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class User {
+@SQLRestriction("is_deleted = false")
+public class User extends BaseEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -83,22 +84,9 @@ public class User {
     @Column(name = "lastLoginAt")
     private LocalDateTime lastLoginAt;
 
-    @Column(name = "createdAt", nullable = false, updatable = false)
-    private LocalDateTime createdAt;
-
-    @Column(name = "updatedAt")
-    private LocalDateTime updatedAt;
-
     @PrePersist
-    protected void onCreate() {
-        createdAt = LocalDateTime.now();
-        updatedAt = LocalDateTime.now();
+    protected void initFields() {
         if (status == null) status = "ACTIVE";
         if (mustChangePassword == null) mustChangePassword = false;
-    }
-
-    @PreUpdate
-    protected void onUpdate() {
-        updatedAt = LocalDateTime.now();
     }
 }

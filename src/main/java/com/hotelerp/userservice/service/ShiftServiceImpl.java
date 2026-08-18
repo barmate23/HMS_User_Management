@@ -161,6 +161,7 @@ public class ShiftServiceImpl implements ShiftService {
             }
             Shift shift = opt.get();
             shift.setStatus("INACTIVE");
+            shift.setIsDeleted(true);
             repository.save(shift);
             return StandardResponse.success("Shift deactivated successfully");
         } catch (Exception e) {
@@ -220,8 +221,8 @@ public class ShiftServiceImpl implements ShiftService {
                 .hotelName(hotel != null ? hotel.getName() : null)
                 .status(shift.getStatus())
                 .notes(shift.getNotes())
-                .createdAt(shift.getCreatedAt())
-                .updatedAt(shift.getUpdatedAt())
+                .createdAt(shift.getCreatedOn())
+                .updatedAt(shift.getModifiedOn())
                 .build();
     }
 }

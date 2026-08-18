@@ -2,7 +2,7 @@ package com.hotelerp.userservice.entity;
 
 import jakarta.persistence.*;
 import lombok.*;
-
+import org.hibernate.annotations.SQLRestriction;
 import java.time.LocalDateTime;
 
 @Entity
@@ -11,10 +11,12 @@ import java.time.LocalDateTime;
         @Index(name = "idx_password_reset_code", columnList = "resetCode")
 })
 @Data
+@EqualsAndHashCode(callSuper = true)
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class PasswordResetToken {
+@SQLRestriction("is_deleted = false")
+public class PasswordResetToken extends BaseEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -34,14 +36,6 @@ public class PasswordResetToken {
     private LocalDateTime expiresAt;
 
     private LocalDateTime usedAt;
-
-    @Column(nullable = false, updatable = false)
-    private LocalDateTime createdAt;
-
-    @PrePersist
-    protected void onCreate() {
-        createdAt = LocalDateTime.now();
-    }
 
     public boolean isUsable() {
         return usedAt == null && expiresAt.isAfter(LocalDateTime.now());
