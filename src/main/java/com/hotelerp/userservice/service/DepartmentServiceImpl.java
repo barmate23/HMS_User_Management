@@ -20,12 +20,15 @@ import java.util.stream.Collectors;
 public class DepartmentServiceImpl implements DepartmentService {
 
     private final DepartmentRepository departmentRepository;
+    private final com.hotelerp.userservice.repository.HotelRepository hotelRepository;
+    private final com.hotelerp.userservice.config.LoginUser loginUser;
 
     @Override
     @Transactional(readOnly = true)
     public StandardResponse<List<DepartmentResponse>> getAllDepartments() {
-        log.info("Fetching all departments");
-        List<DepartmentResponse> departments = departmentRepository.findAll().stream()
+        Long hotelId = loginUser != null ? loginUser.getHotelId() : null;
+        log.info("Fetching all departments for hotel ID: {}", hotelId);
+        List<DepartmentResponse> departments = departmentRepository.findAllByPropertyId(hotelId).stream()
                 .map(this::mapToResponse)
                 .collect(Collectors.toList());
         return StandardResponse.success(departments, "Departments fetched successfully");
@@ -34,24 +37,29 @@ public class DepartmentServiceImpl implements DepartmentService {
     @Override
     @Transactional(readOnly = true)
     public StandardResponse<DepartmentResponse> getDepartmentById(Long id) {
-        log.info("Fetching department by ID: {}", id);
-        return departmentRepository.findById(id)
-                .map(dept -> StandardResponse.success(mapToResponse(dept), "Department fetched successfully"))
-                .orElse(StandardResponse.error("Department not found", "NOT_FOUND", "id", String.valueOf(id)));
+        Long hotelId = loginUser != null ? loginUser.getHotelId() : null;
+        log.info("Fetching department by ID: {} for hotel ID: {}", id, hotelId);
+        Optional<Department> deptOpt = departmentRepository.findById(id);
+        if (deptOpt.isEmpty() || (hotelId != null && deptOpt.get().getProperty() != null && !hotelId.equals(deptOpt.get().getProperty().getId()))) {
+            return StandardResponse.error("Department not found", "NOT_FOUND", "id", String.valueOf(id));
+        }
+        return StandardResponse.success(mapToResponse(deptOpt.get()), "Department fetched successfully");
     }
 
     @Override
     @Transactional
     public StandardResponse<DepartmentResponse> createDepartment(DepartmentRequest request) {
-        log.info("Creating new department: {}", request.getName());
+        Long hotelId = loginUser != null ? loginUser.getHotelId() : null;
+        log.info("Creating new department: {} for hotel ID: {}", request.getName(), hotelId);
         
-        if (departmentRepository.findByName(request.getName()).isPresent()) {
+        if (departmentRepository.findByNameAndPropertyId(request.getName(), hotelId).isPresent()) {
             return StandardResponse.error("Department name already exists", "DUPLICATE_DEPT_NAME", "name", request.getName());
         }
 
         Department department = Department.builder()
                 .name(request.getName())
                 .description(request.getDescription())
+                .property(hotelId != null ? hotelRepository.findById(hotelId).orElse(null) : null)
                 .isActive(request.getIsActive() != null ? request.getIsActive() : true)
                 .build();
 
@@ -62,11 +70,17 @@ public class DepartmentServiceImpl implements DepartmentService {
     @Override
     @Transactional
     public StandardResponse<DepartmentResponse> updateDepartment(Long id, DepartmentRequest request) {
-        log.info("Updating department ID: {}", id);
+        Long hotelId = loginUser != null ? loginUser.getHotelId() : null;
+        log.info("Updating department ID: {} for hotel ID: {}", id, hotelId);
         
         Optional<Department> deptOpt = departmentRepository.findById(id);
-        if (deptOpt.isEmpty()) {
+        if (deptOpt.isEmpty() || (hotelId != null && deptOpt.get().getProperty() != null && !hotelId.equals(deptOpt.get().getProperty().getId()))) {
             return StandardResponse.error("Department not found", "NOT_FOUND", "id", String.valueOf(id));
+        }
+
+        Optional<Department> existingWithName = departmentRepository.findByNameAndPropertyId(request.getName(), hotelId);
+        if (existingWithName.isPresent() && !existingWithName.get().getId().equals(id)) {
+            return StandardResponse.error("Department name already exists", "DUPLICATE_DEPT_NAME", "name", request.getName());
         }
 
         Department department = deptOpt.get();
@@ -83,10 +97,14 @@ public class DepartmentServiceImpl implements DepartmentService {
     @Override
     @Transactional
     public StandardResponse<Void> deleteDepartment(Long id) {
-        log.info("Deleting department ID: {}", id);
-        if (!departmentRepository.existsById(id)) {
+        Long hotelId = loginUser != null ? loginUser.getHotelId() : null;
+        log.info("Deleting department ID: {} for hotel ID: {}", id, hotelId);
+        
+        Optional<Department> deptOpt = departmentRepository.findById(id);
+        if (deptOpt.isEmpty() || (hotelId != null && deptOpt.get().getProperty() != null && !hotelId.equals(deptOpt.get().getProperty().getId()))) {
             return StandardResponse.error("Department not found", "NOT_FOUND", "id", String.valueOf(id));
         }
+
         departmentRepository.deleteById(id);
         return StandardResponse.success(null, "Department deleted successfully");
     }
@@ -94,8 +112,9 @@ public class DepartmentServiceImpl implements DepartmentService {
     @Override
     @Transactional(readOnly = true)
     public StandardResponse<List<DepartmentResponse>> getActiveDepartments() {
-        log.info("Fetching active departments");
-        List<DepartmentResponse> departments = departmentRepository.findByIsActiveTrue().stream()
+        Long hotelId = loginUser != null ? loginUser.getHotelId() : null;
+        log.info("Fetching active departments for hotel ID: {}", hotelId);
+        List<DepartmentResponse> departments = departmentRepository.findActiveByPropertyId(hotelId).stream()
                 .map(this::mapToResponse)
                 .collect(Collectors.toList());
         return StandardResponse.success(departments, "Active departments fetched successfully");
@@ -108,6 +127,8 @@ public class DepartmentServiceImpl implements DepartmentService {
                 .name(department.getName())
                 .description(department.getDescription())
                 .isActive(department.getIsActive())
+                .hotelId(department.getProperty() != null ? department.getProperty().getId() : null)
+                .hotelName(department.getProperty() != null ? department.getProperty().getName() : null)
                 .createdAt(department.getCreatedAt())
                 .updatedAt(department.getUpdatedAt())
                 .build();

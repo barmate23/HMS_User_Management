@@ -23,6 +23,10 @@ public class Department {
     @Column(name = "description")
     private String description;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "hotel_id")
+    private Hotel property;
+
     @Builder.Default
     @Column(name = "is_active")
     private Boolean isActive = true;

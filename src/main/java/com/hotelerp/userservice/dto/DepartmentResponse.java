@@ -12,6 +12,8 @@ public class DepartmentResponse {
     private String name;
     private String description;
     private Boolean isActive;
+    private Long hotelId;
+    private String hotelName;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 }
