@@ -24,4 +24,12 @@ public class ServiceConstants {
     public static final String GET_ALL_SHIFTS  = "/getAllShifts";
     public static final String DELETE_SHIFT    = "/deleteShift/{id}";
     public static final String ASSIGN_SHIFT    = "/assignShift/{userId}";
+
+    // ── Licensing & Client Onboarding ─────────────────────────────────────
+    public static final String LICENSE_BASE_URL     = "/api/hmsUserService/v1/licenses";
+    public static final String ONBOARD_CLIENT       = "/onboard-client";
+    public static final String ACTIVATE_LICENSE     = "/activate";
+    public static final String RENEW_LICENSE        = "/renew";
+    public static final String GET_LICENSE_STATUS   = "/status/{hotelId}";
+    public static final String VALIDATE_LICENSE_KEY = "/validate";
 }

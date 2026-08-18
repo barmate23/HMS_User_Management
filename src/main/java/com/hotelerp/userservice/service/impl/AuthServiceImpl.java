@@ -43,6 +43,7 @@ public class AuthServiceImpl implements AuthService {
     private final UserRepository userRepository;
     private final AuthSessionRepository authSessionRepository;
     private final PasswordResetTokenRepository passwordResetTokenRepository;
+    private final com.hotelerp.userservice.repository.HotelRepository hotelRepository;
     private final BCryptPasswordEncoder passwordEncoder;
     private final JwtService jwtService;
     private final UserCredentialEmailService credentialEmailService;
@@ -276,6 +277,18 @@ public class AuthServiceImpl implements AuthService {
     }
 
     private AuthUserResponse toAuthUser(User user, List<String> authorities) {
+        Long hotelId = null;
+        String licenseStatus = null;
+        LocalDateTime licenseExpiresAt = null;
+
+        var hotelOpt = hotelRepository.findByEmail(user.getEmail());
+        if (hotelOpt.isPresent()) {
+            Hotel h = hotelOpt.get();
+            hotelId = h.getId();
+            licenseStatus = h.getLicenseStatus();
+            licenseExpiresAt = h.getLicenseExpiresAt();
+        }
+
         return AuthUserResponse.builder()
                 .id(user.getId())
                 .employeeId(user.getEmployeeId())
@@ -287,6 +300,9 @@ public class AuthServiceImpl implements AuthService {
                 .roleCode(codeOf(user.getRole()))
                 .department(valueOf(user.getDepartment()))
                 .property(valueOf(user.getProperty()))
+                .hotelId(hotelId)
+                .licenseStatus(licenseStatus)
+                .licenseExpiresAt(licenseExpiresAt)
                 .status(user.getStatus())
                 .lastLoginAt(user.getLastLoginAt())
                 .authorities(authorities)
