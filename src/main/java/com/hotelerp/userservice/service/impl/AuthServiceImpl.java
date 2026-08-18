@@ -298,7 +298,6 @@ public class AuthServiceImpl implements AuthService {
                 .phone(user.getPhone())
                 .role(valueOf(user.getRole()))
                 .roleCode(codeOf(user.getRole()))
-                .department(valueOf(user.getDepartment()))
                 .property(valueOf(user.getProperty()))
                 .hotelId(hotelId)
                 .licenseStatus(licenseStatus)
