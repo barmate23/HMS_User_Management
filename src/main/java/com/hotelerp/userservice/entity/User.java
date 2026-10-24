@@ -75,10 +75,11 @@ public class User extends BaseEntity {
     @Column(name = "passwordHash", length = 255)
     private String passwordHash;
 
-    @Column(name = "mustChangePassword", nullable = false)
-    private Boolean mustChangePassword;
+    @Builder.Default
+    @Column(name = "must_change_password", columnDefinition = "BOOLEAN DEFAULT FALSE")
+    private Boolean mustChangePassword = false;
 
-    @Column(name = "defaultPasswordGeneratedAt")
+    @Column(name = "default_password_generated_at")
     private LocalDateTime defaultPasswordGeneratedAt;
 
     @Column(name = "lastLoginAt")
