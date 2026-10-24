@@ -58,7 +58,7 @@ pipeline {
                         --restart unless-stopped \
                         -p ${HOST_PORT}:${CONTAINER_PORT} \
                         --network ${DOCKER_NETWORK} \
-                        -e EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://adminserviceregistry:8761/eureka/ \
+                        -e EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://serviceregistry:8761/eureka/ \
                         -e EUREKA_CLIENT_REGISTER_WITH_EUREKA=true \
                         -e EUREKA_CLIENT_FETCH_REGISTRY=true \
                         -e EUREKA_INSTANCE_LEASE_RENEWAL_INTERVAL_IN_SECONDS=10 \
